@@ -1,0 +1,17 @@
+# Core Web Framework
+Flask==3.1.1
+Flask-CORS==6.0.0
+Flask-SQLAlchemy==3.1.1
+
+# Blockchain & Web3
+web3==7.13.0
+eth-account==0.13.7
+
+# Environment Variables
+python-dotenv==1.1.1
+
+# Security
+flask-talisman==1.1.0
+
+# Production WSGI Server
+waitress==3.0.2

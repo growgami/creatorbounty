@@ -1,0 +1,108 @@
+'use client';
+
+import React, { useState, useRef, useEffect } from 'react';
+import { LogOut, User, ChevronDown } from 'lucide-react';
+import { useRole } from '@/features/rbac/hooks/useRole';
+
+interface UserMenuProps {
+  className?: string;
+  userInitial?: string;
+}
+
+const UserMenu: React.FC<UserMenuProps> = ({ 
+  className = '',
+  userInitial = 'U'
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { role, clearRole } = useRole();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    clearRole();
+    setIsOpen(false);
+  };
+
+  const getRoleDisplayName = () => {
+    switch (role) {
+      case 'admin':
+        return 'Admin';
+      case 'creator':
+        return 'Creator';
+      default:
+        return 'User';
+    }
+  };
+
+  return (
+    <div className={`relative ${className}`} ref={menuRef}>
+      {/* User Avatar Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center space-x-2 hover:bg-white/5 rounded-lg px-2 py-1 transition-colors"
+      >
+        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black text-sm font-space-grotesk">
+          {userInitial}
+        </div>
+        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {/* Dropdown Menu */}
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-white/10 rounded-lg shadow-lg z-50 py-2">
+          {/* User Info Section */}
+          <div className="px-4 py-3 border-b border-white/10">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black text-sm font-space-grotesk">
+                {userInitial}
+              </div>
+              <div>
+                <p className="text-sm text-white font-space-grotesk">
+                  {getRoleDisplayName()}
+                </p>
+                <p className="text-xs text-gray-400 font-space-grotesk">
+                  {role}@creatorbounty.com
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Menu Items */}
+          <div className="py-2">
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                // Could add profile functionality here
+              }}
+              className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center space-x-3 font-space-grotesk"
+            >
+              <User className="w-4 h-4" />
+              <span>Profile Settings</span>
+            </button>
+            
+            <button
+              onClick={handleLogout}
+              className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-red-500/10 hover:text-red-400 transition-colors flex items-center space-x-3 font-space-grotesk"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default UserMenu;
