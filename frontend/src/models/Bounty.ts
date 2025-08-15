@@ -65,6 +65,7 @@ export interface BountyCreationRequest {
   description: string;
   bountyPool: number;
   tokenSymbol: string;
+  totalSubmissions: number;
   status?: BountyStatus;
   endDate?: string;
   requirements?: string[];

@@ -8,7 +8,7 @@ interface SubmissionModalProps {
   onClose: () => void;
   onSubmit: (data: SubmissionFormData) => Promise<void>;
   requirements: Requirement[];
-  campaignTitle: string;
+  bountyTitle: string;
 }
 
 /**
@@ -20,7 +20,7 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
   onClose,
   onSubmit,
   requirements,
-  campaignTitle
+  bountyTitle
 }) => {
   const [formData, setFormData] = useState<SubmissionFormData>({
     tiktokUrl: '',
@@ -144,7 +144,7 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
         <div className="relative z-10 flex items-center justify-between p-6 border-b border-white/10">
           <div>
             <h2 className="text-xl font-bold text-white">Submit Your Entry</h2>
-            <p className="text-sm text-gray-400 mt-1">{campaignTitle}</p>
+            <p className="text-sm text-gray-400 mt-1">{bountyTitle}</p>
           </div>
           <button
             onClick={onClose}

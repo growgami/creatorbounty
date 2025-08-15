@@ -68,11 +68,13 @@ const SubmissionStatus: React.FC<SubmissionStatusProps> = ({
     }).format(date);
   };
 
+  /*
   const getTikTokVideoId = (url: string) => {
     // Extract video ID from TikTok URL for thumbnail
     const match = url.match(/\/video\/(\d+)/);
     return match ? match[1] : null;
   };
+  */
 
   return (
     <div 

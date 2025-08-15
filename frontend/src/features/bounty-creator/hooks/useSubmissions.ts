@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { SubmissionFormData, SubmissionData, SubmissionStatus, ValidationResult } from '../types/types';
+import { SubmissionFormData, SubmissionData, SubmissionStatus } from '../types/types';
 
 interface UseSubmissionReturn {
   submissions: SubmissionData[];

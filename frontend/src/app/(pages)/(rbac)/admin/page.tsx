@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import AdminLanding from '@/features/landing-pages/authenticated/admin/orchestrator/AdminLanding';
 
 /**
@@ -8,7 +8,11 @@ import AdminLanding from '@/features/landing-pages/authenticated/admin/orchestra
  * Renders the admin orchestrator for campaign management
  */
 const AdminPage: React.FC = () => {
-  return <AdminLanding />;
+  return (
+    <Suspense>
+      <AdminLanding />
+    </Suspense>
+  );
 };
 
 export default AdminPage;

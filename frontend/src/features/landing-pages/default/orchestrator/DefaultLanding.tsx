@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import RBACModal from '@/features/rbac/components/RBAC';
 import AnimatedGridBackground from '@/components/backgrounds/AnimatedGridBackground';
 import { useRole } from '@/features/rbac/hooks/useRole';

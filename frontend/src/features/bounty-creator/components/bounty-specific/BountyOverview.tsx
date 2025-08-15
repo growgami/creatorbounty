@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
 import { BountyData, SubmissionFormData } from '../../types/types';
 import RequirementsList from './RequirementsList';
-import ProgressBar from './ProgressBar';
+import ProgressBar from '../ui/ProgressBar';
 import SubmissionModal from '../../modals/SubmissionModal';
-import SubmissionStatus from '../submission/SubmissionStatus';
+import SubmissionStatus from './SubmissionStatus';
 import { useSubmission } from '../../hooks/useSubmissions';
 import AuraButton from '@/components/ui/AuraButton';
 
-interface CampaignCardProps {
+interface BountyOverviewProps {
   bountyData: BountyData;
   className?: string;
 }
 
 /**
- * Campaign Card Component
+ * Bounty Overview Component
  * Displays the main bounty information card with header, description, requirements, and action button
  */
-const CampaignCard: React.FC<CampaignCardProps> = ({
+const BountyOverview: React.FC<BountyOverviewProps> = ({
   bountyData,
   className = ""
 }) => {
@@ -45,7 +45,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
 
   return (
     <div className={`w-full ${className}`}>
-      {/* Main Campaign Card */}
+      {/* Main Bounty Card */}
       <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 shadow-sm mb-6">
         <div className="flex items-start justify-between mb-6">
           <div className="flex-1">
@@ -112,11 +112,11 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
           onClose={() => setIsModalOpen(false)}
           onSubmit={handleSubmission}
           requirements={defaultRequirements}
-          campaignTitle={bountyData.title}
+          bountyTitle={bountyData.title}
         />
       </div>
     </div>
   );
 };
 
-export default CampaignCard;
+export default BountyOverview;

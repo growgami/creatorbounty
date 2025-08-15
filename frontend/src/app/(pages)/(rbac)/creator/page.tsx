@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import CreatorLanding from '@/features/landing-pages/authenticated/creator/orchestrator/CreatorLanding';
 
 /**
@@ -8,7 +8,11 @@ import CreatorLanding from '@/features/landing-pages/authenticated/creator/orche
  * Renders the creator orchestrator for bounty participation
  */
 const CreatorPage: React.FC = () => {
-  return <CreatorLanding />;
+  return (
+    <Suspense>
+      <CreatorLanding />
+    </Suspense>
+  );
 };
 
 export default CreatorPage;

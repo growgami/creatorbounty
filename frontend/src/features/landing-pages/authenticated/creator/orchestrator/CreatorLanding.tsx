@@ -1,83 +1,82 @@
 'use client';
 
 import React from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { FadeIn, SlideUp } from '@/components/animations/FadeInTransition';
 import Stats from '@/features/bounty-creator/components/ui/Stats';
 import AnimatedGridBackground from '@/components/backgrounds/AnimatedGridBackground';
 import BountiesClient from '@/features/bounty-creator/orchestrator/CreatorBounties';
 import Navbar from '@/components/layouts/Navbar';
-import CampaignCards from '@/components/containers/BountyCards';
-import { useCampaign } from '@/features/bounty-creator/hooks/useCampaign';
-
-interface Campaign {
-  id: string;
-  title: string;
-  description: string;
-  bountyPool: number;
-  tokenSymbol: string;
-  submissionsCount: number;
-  totalSubmissions: number;
-  status: 'active' | 'upcoming' | 'ended';
-  completionPercentage: number;
-}
+import CampaignCards from '@/components/containers/BountyCardContainer';
+import { useBounties } from '@/features/bounty-admin/hooks/bounty-actions/useGetBounties';
 
 interface LandingPageProps {
   className?: string;
 }
 
-// Demo data for 90-second video walkthrough
-const featuredCampaigns: Campaign[] = [
-  {
-    id: 'plasma-testnet',
-    title: 'Plasma Testnet',
-    description: 'Community-driven testnet promotion on TikTok',
-    bountyPool: 50000,
-    tokenSymbol: 'XPL',
-    submissionsCount: 78,
-    totalSubmissions: 100,
-    status: 'active',
-    completionPercentage: 78
-  },
-  {
-    id: 'defi-showcase',
-    title: 'DeFi Showcase',
-    description: 'Show off your DeFi knowledge',
-    bountyPool: 2500,
-    tokenSymbol: 'XPL',
-    submissionsCount: 8,
-    totalSubmissions: 15,
-    status: 'active',
-    completionPercentage: 53
-  },
-  {
-    id: 'nft-creation',
-    title: 'NFT Creator',
-    description: 'Create unique NFT content',
-    bountyPool: 5000,
-    tokenSymbol: 'XPL',
-    submissionsCount: 0,
-    totalSubmissions: 20,
-    status: 'upcoming',
-    completionPercentage: 0
-  }
-];
-
 const LandingPage: React.FC<LandingPageProps> = ({ 
   className = '' 
 }) => {
   const searchParams = useSearchParams();
-  const campaign = searchParams.get('campaign');
-  const { navigateToCampaign } = useCampaign();
+  const bounty = searchParams.get('bounty');
+  const router = useRouter();
+  const navigateToBounty = (data?: { bountyId?: string }) => {
+    if (data?.bountyId) {
+      router.push(`/creator?bounty=${data.bountyId}`);
+    } else {
+      router.push('/creator');
+    }
+  };
+  const { bounties, isLoading, isError, error } = useBounties();
   
-  // If campaign query param exists, show the bounty orchestrator
-  if (campaign) {
+  // If bounty query param exists, show the bounty orchestrator
+  if (bounty) {
     return <BountiesClient />;
   }
 
-  const handleCampaignClick = (campaignId: string) => {
-    navigateToCampaign({ campaignId });
+  const handleBountyClick = (bountyId: string) => {
+    navigateToBounty({ bountyId });
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen bg-[#222] relative ${className}`}>
+        <AnimatedGridBackground />
+        <main className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-12">
+          <div className="bg-[#101010] rounded-3xl border border-white/10 p-6 sm:p-10 lg:p-14 shadow-[0_8px_32px_rgba(0,0,0,0.3),_0_0_0_1px_rgba(255,255,255,0.05)]">
+            <Navbar />
+            <div className="flex justify-center items-center h-64">
+              <div className="text-white">Loading bounties...</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (isError) {
+    return (
+      <div className={`min-h-screen bg-[#222] relative ${className}`}>
+        <AnimatedGridBackground />
+        <main className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-12">
+          <div className="bg-[#101010] rounded-3xl border border-white/10 p-6 sm:p-10 lg:p-14 shadow-[0_8px_32px_rgba(0,0,0,0.3),_0_0_0_1px_rgba(255,255,255,0.05)]">
+            <Navbar />
+            <div className="flex justify-center items-center h-64">
+              <div className="text-red-400">Error loading bounties: {error?.message || 'Unknown error'}</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Map bounties to campaigns (ensure status is not undefined)
+  const campaigns = bounties.map(bounty => ({
+    ...bounty,
+    status: bounty.status || 'active' // Default to 'active' if status is undefined
+  }));
 
   return (
     <div className={`min-h-screen bg-[#222] relative ${className}`}>
@@ -102,8 +101,8 @@ const LandingPage: React.FC<LandingPageProps> = ({
           <SlideUp delay={0.2}>
             <CampaignCards
               variant="grid"
-              campaigns={featuredCampaigns}
-              onCampaignClick={handleCampaignClick}
+              campaigns={campaigns}
+              onCampaignClick={handleBountyClick}
             />
           </SlideUp>
 

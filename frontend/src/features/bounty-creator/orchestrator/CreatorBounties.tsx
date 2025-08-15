@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import CampaignCard from '@/features/bounty-creator/components/ui/BountyCard';
+import BountyOverview from '@/features/bounty-creator/components/bounty-specific/BountyOverview';
 import TabNavigation from '@/features/bounty-creator/components/tabs/TabNavigation';
 import TabContent from '@/features/bounty-creator/components/tabs/TabContent';
 import UserMenu from '@/components/layouts/UserMenu';
 import AnimatedGridBackground from '@/components/backgrounds/AnimatedGridBackground';
 import { BountyData, TabKey, Tab } from '@/features/bounty-creator/types/types';
+import { useBountyById } from '@/features/bounty-admin/hooks/bounty-actions/useGetBountyById';
 
 
 interface BountiesClientProps {
@@ -22,12 +23,69 @@ interface BountiesClientProps {
 const BountiesClient: React.FC<BountiesClientProps> = ({ className = '' }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const campaign = searchParams.get('campaign') || 'plasma-testnet';
+  const bountyId = searchParams.get('bounty');
   const [activeTab, setActiveTab] = useState<TabKey>('submitted');
 
-  // Mock bounty data for demo
-  const bountyData: BountyData = {
-    title: campaign === 'plasma-testnet' ? 'Plasma Testnet Campaign' : `${campaign.charAt(0).toUpperCase() + campaign.slice(1)} Campaign`,
+  // Fetch actual bounty data
+  const { bounty: fetchedBounty, isLoading, isError, error } = useBountyById(bountyId);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen bg-[#222] relative ${className}`}>
+        <AnimatedGridBackground />
+        <main className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-12">
+          <div className="bg-[#101010] rounded-3xl border border-white/10 p-6 sm:p-10 lg:p-14 shadow-[0_8px_32px_rgba(0,0,0,0.3),_0_0_0_1px_rgba(255,255,255,0.05)]">
+            <div className="flex justify-center items-center h-64">
+              <div className="text-white">Loading bounty details...</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (isError) {
+    return (
+      <div className={`min-h-screen bg-[#222] relative ${className}`}>
+        <AnimatedGridBackground />
+        <main className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-12">
+          <div className="bg-[#101010] rounded-3xl border border-white/10 p-6 sm:p-10 lg:p-14 shadow-[0_8px_32px_rgba(0,0,0,0.3),_0_0_0_1px_rgba(255,255,255,0.05)]">
+            <div className="flex justify-center items-center h-64">
+              <div className="text-red-400">Error loading bounty: {error?.message || 'Unknown error'}</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Map BountyStatus to BountyData status
+  const mapBountyStatus = (status: string | undefined): 'active' | 'ended' | 'pending' | undefined => {
+    switch (status) {
+      case 'active':
+      case 'paused':
+      case 'completed':
+        return 'active';
+      case 'ended':
+        return 'ended';
+      case 'draft':
+        return 'pending';
+      default:
+        return 'active';
+    }
+  };
+
+  // Use fetched bounty data or fallback to mock data
+  const bountyData: BountyData = fetchedBounty ? {
+    title: fetchedBounty.title,
+    reward: `${fetchedBounty.bountyPool.toLocaleString()} ${fetchedBounty.tokenSymbol}`,
+    description: fetchedBounty.description,
+    status: mapBountyStatus(fetchedBounty.status),
+    endDate: fetchedBounty.endDate ? `Ends ${new Date(fetchedBounty.endDate).toLocaleDateString()}` : 'No end date'
+  } : {
+    title: 'Plasma Testnet Campaign',
     reward: '1,000 XPL',
     description: 'Create engaging TikTok content showcasing the Plasma testnet. Include #PlasmaTestnet hashtag and demonstrate key features of the platform.',
     status: 'active',
@@ -100,9 +158,9 @@ const BountiesClient: React.FC<BountiesClientProps> = ({ className = '' }) => {
             </div>
           </div>
 
-          {/* Campaign Card */}
+          {/* Bounty Overview */}
           <div className="mb-8">
-            <CampaignCard 
+            <BountyOverview 
               bountyData={bountyData}
             />
           </div>
