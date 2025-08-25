@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate unique ID (in production, use proper UUID library)
-    const id = `bounty_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const now = new Date().toISOString();
 
     // Create bounty object

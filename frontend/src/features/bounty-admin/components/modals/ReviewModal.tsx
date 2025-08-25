@@ -8,7 +8,7 @@ import ConfettiAnimation from '../../../../components/animations/ConfettiAnimati
 import ConfirmationModal from '@/features/bounty-admin/components/modals/ConfirmationModal';
 import EnhancedToast from '@/components/notifications/Toast';
 import { usePayments } from '@/features/bounty-admin/hooks/usePayments';
-import { paymentApi } from '@/services/wsgi-api/paymentApi';
+import { paymentApi } from '@/services/wsgi/actions/paymentApi';
 
 interface ReviewModalProps {
   isOpen: boolean;

@@ -13,6 +13,9 @@
 // - Data Type: The type of value that can be stored in a column (e.g., VARCHAR, INTEGER, TIMESTAMP)
 // - Constraint: Rules applied to columns to enforce data integrity (e.g., NOT NULL, UNIQUE)
 // - Index: A database structure that improves query performance
+// - Foreign Key: A column that references the primary key of another table
+
+import { PostgreSQLError } from '@/types/PostgresError';
 
 export type BountyStatus = 'draft' | 'active' | 'paused' | 'completed' | 'ended';
 
@@ -44,7 +47,7 @@ export interface Bounty {
   /** Bounty deadline */
   endDate?: string; // ISO 8601 format
   
-  /** Admin user ID who created this bounty */
+  /** Admin user ID who created this bounty (references User.id) */
   createdBy: string;
   
   /** Requirements for the bounty */
@@ -159,53 +162,24 @@ export const initializeBountyTable = async (dbClient: { query: (sql: string) => 
     
     console.log('Bounty table columns:', result.rows);
     return true;
-  } catch (error) {
-    console.error('Error initializing bounty table:', error);
+  } catch (error: unknown) {
+    // Check if it's a duplicate trigger error (42710) which means the database is already initialized
+    if (error instanceof Error && (error as PostgreSQLError).code === '42710') {
+      console.log('Bounty table already exists and is properly configured');
+      return true;
+    }
+    console.error('Error initializing bounty table:', error instanceof Error ? error.message : String(error));
     return false;
   }
 };
 
-// Function to create database if it doesn't exist
-export const createDatabaseIfNotExists = async () => {
-  // Dynamically import pg to avoid issues with server-side only code
-  const { Client } = await import('pg');
-  
-  // Connect to default postgres database using connection string
-  const defaultClient = new Client({
-    connectionString: `postgresql://${process.env.PSQL_USERNAME}:${process.env.PSQL_PASSWORD}@${process.env.PSQL_HOST}:${process.env.PSQL_PORT || '5432'}/postgres`
-  });
-  
-  try {
-    await defaultClient.connect();
-    
-    // Check if database exists
-    const dbCheckResult = await defaultClient.query(
-      `SELECT 1 FROM pg_database WHERE datname = $1`, 
-      [process.env.PSQL_DATABASE]
-    );
-    
-    if (dbCheckResult.rowCount === 0) {
-      // Database doesn't exist, create it
-      await defaultClient.query(`CREATE DATABASE "${process.env.PSQL_DATABASE}"`);
-      console.log(`Database ${process.env.PSQL_DATABASE} created successfully`);
-    } else {
-      console.log(`Database ${process.env.PSQL_DATABASE} already exists`);
-    }
-    
-    await defaultClient.end();
-    return true;
-  } catch (error) {
-    console.error('Error creating database:', error);
-    await defaultClient.end();
-    return false;
-  }
-};
 
 // Alternative initialization function that creates its own database client
 // using environment variables
 export const initializeBountyTableFromEnv = async () => {
   // Dynamically import pg to avoid issues with server-side only code
   const { Client } = await import('pg');
+  const { createDatabaseIfNotExists } = await import('@/utils/dbInitializer');
   
   // First, ensure database exists
   const dbCreated = await createDatabaseIfNotExists();
@@ -237,8 +211,14 @@ export const initializeBountyTableFromEnv = async () => {
     console.log('Bounty table columns:', result.rows);
     await client.end();
     return true;
-  } catch (error) {
-    console.error('Error initializing bounty table:', error);
+  } catch (error: unknown) {
+    // Check if it's a duplicate trigger error (42710) which means the database is already initialized
+    if (error instanceof Error && (error as PostgreSQLError).code === '42710') {
+      console.log('Bounty table already exists and is properly configured');
+      await client.end();
+      return true;
+    }
+    console.error('Error initializing bounty table:', error instanceof Error ? error.message : String(error));
     await client.end();
     return false;
   }

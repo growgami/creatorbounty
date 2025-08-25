@@ -1,19 +1,20 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { LogOut, User, ChevronDown } from 'lucide-react';
 import { useRole } from '@/features/rbac/hooks/useRole';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 interface UserMenuProps {
   className?: string;
-  userInitial?: string;
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({ 
-  className = '',
-  userInitial = 'U'
+  className = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useAuth();
   const { role, clearRole } = useRole();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -30,6 +31,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
   }, []);
 
   const handleLogout = () => {
+    logout();
     clearRole();
     setIsOpen(false);
   };
@@ -45,6 +47,8 @@ const UserMenu: React.FC<UserMenuProps> = ({
     }
   };
 
+  if (!user) return null;
+
   return (
     <div className={`relative ${className}`} ref={menuRef}>
       {/* User Avatar Button */}
@@ -52,8 +56,15 @@ const UserMenu: React.FC<UserMenuProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-2 hover:bg-white/5 rounded-lg px-2 py-1 transition-colors"
       >
-        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black text-sm font-space-grotesk">
-          {userInitial}
+        <div className="relative w-8 h-8">
+          <Image
+            src={user.userPfp}
+            alt={`${user.username} profile picture`}
+            width={32}
+            height={32}
+            className="rounded-full object-cover"
+            unoptimized
+          />
         </div>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -64,15 +75,25 @@ const UserMenu: React.FC<UserMenuProps> = ({
           {/* User Info Section */}
           <div className="px-4 py-3 border-b border-white/10">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black text-sm font-space-grotesk">
-                {userInitial}
+              <div className="relative w-10 h-10">
+                <Image
+                  src={user.userPfp}
+                  alt={`${user.username} profile picture`}
+                  width={40}
+                  height={40}
+                  className="rounded-full object-cover"
+                  unoptimized
+                />
               </div>
               <div>
                 <p className="text-sm text-white font-space-grotesk">
-                  {getRoleDisplayName()}
+                  {user.name || user.username}
                 </p>
                 <p className="text-xs text-gray-400 font-space-grotesk">
-                  {role}@creatorbounty.com
+                  @{user.username}
+                </p>
+                <p className="text-xs text-blue-400 font-space-grotesk">
+                  {getRoleDisplayName()}
                 </p>
               </div>
             </div>

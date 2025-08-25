@@ -4,7 +4,7 @@ import RequirementsList from './RequirementsList';
 import ProgressBar from '../ui/ProgressBar';
 import SubmissionModal from '../../modals/SubmissionModal';
 import SubmissionStatus from './SubmissionStatus';
-import { useSubmission } from '../../hooks/useSubmissions';
+import { useSubmitEntry } from '../../hooks/useSubmitEntry';
 import AuraButton from '@/components/ui/AuraButton';
 
 interface BountyOverviewProps {
@@ -21,7 +21,7 @@ const BountyOverview: React.FC<BountyOverviewProps> = ({
   className = ""
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { submitEntry, hasActiveSubmission, latestSubmission } = useSubmission();
+  const { submitEntry, hasActiveSubmission, latestSubmission } = useSubmitEntry();
   const defaultRequirements = [
     { id: '1', text: 'Include #PlasmaTestnet hashtag' },
     { id: '2', text: 'Video length ≥ 10 seconds' },

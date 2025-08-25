@@ -1,8 +1,8 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { PaymentRequest, TransactionStatus, Balance, ApiError } from '@/services/wsgi-api/wsgiApiClient';
-import { paymentApi } from '@/services/wsgi-api/paymentApi';
+import { PaymentRequest, TransactionStatus, Balance, ApiError } from '@/services/wsgi/wsgiApiClient';
+import { paymentApi } from '@/services/wsgi/actions/paymentApi';
 
 export const usePayments = () => {
   const queryClient = useQueryClient();

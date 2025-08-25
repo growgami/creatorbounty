@@ -1,5 +1,5 @@
-import { apiRequest } from './wsgiApiClient';
-import { PaymentRequest, TransactionStatus, Balance } from './wsgiApiClient';
+import { apiRequest } from '../wsgiApiClient';
+import { PaymentRequest, TransactionStatus, Balance } from '../wsgiApiClient';
 
 // Payment API methods
 export const paymentApi = {

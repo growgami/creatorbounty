@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export type UserRole = 'admin' | 'creator' | null;
 
@@ -15,43 +16,44 @@ interface UseRoleReturn {
 
 /**
  * Hook for managing user role state and URL navigation
- * Handles both role state management and automatic URL routing
+ * Gets role from authenticated user with localStorage as cache
  */
 export const useRole = (): UseRoleReturn => {
+  const { user } = useAuth();
   const [role, setRoleState] = useState<UserRole>(null);
   const router = useRouter();
 
-  // Load role from localStorage on mount
+  // Sync role from authenticated user
   useEffect(() => {
-    const savedRole = localStorage.getItem('userRole') as UserRole;
-    if (savedRole && (savedRole === 'admin' || savedRole === 'creator')) {
-      setRoleState(savedRole);
+    if (user?.role) {
+      setRoleState(user.role);
+      // Update localStorage cache
+      localStorage.setItem('userRole', user.role);
+    } else {
+      // No authenticated user, clear role
+      setRoleState(null);
+      localStorage.removeItem('userRole');
     }
-  }, []);
+  }, [user]);
 
   const setRole = useCallback((newRole: UserRole) => {
-    setRoleState(newRole);
-    
-    // Persist role to localStorage
-    if (newRole) {
-      localStorage.setItem('userRole', newRole);
-      
+    // Note: Role is now determined by authentication, not manual selection
+    // This method is kept for backward compatibility but doesn't change auth role
+    if (newRole && newRole !== role) {
       // Map role to URL path
       const rolePath = newRole === 'admin' ? 'admin' : 'creator';
       
-      // Navigate to role-specific bounty page with preserved params
+      // Navigate to role-specific bounty page
       const targetUrl = `/${rolePath}`;
-      
       router.push(targetUrl);
-    } else {
-      localStorage.removeItem('userRole');
     }
-  }, [router]);
+  }, [router, role]);
 
   const clearRole = useCallback(() => {
+    // Clear cached role, but actual role clearing requires logout
     setRoleState(null);
     localStorage.removeItem('userRole');
-    // Navigate back to role selection page
+    // Navigate back to home page
     router.push('/');
   }, [router]);
 

@@ -34,16 +34,22 @@ export type SubmissionStatus = 'pending' | 'claimed' | 'rejected';
 
 export interface SubmissionData {
   id: string;
-  tiktokUrl: string;
-  submittedAt: Date;
+  bountyId: string;
+  creator: string;
+  creatorPfp: string;
+  submitted_url: string;
   status: SubmissionStatus;
-  rejectionReason?: string;
-  notes?: string;
+  wallet_address?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface SubmissionFormData {
   tiktokUrl: string;
   agreedToTerms: boolean;
+  bountyId: string;
+  creator: string;
+  creatorPfp: string;
 }
 
 export interface ValidationResult {

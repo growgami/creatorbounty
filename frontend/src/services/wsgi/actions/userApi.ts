@@ -1,5 +1,5 @@
-import { apiRequest } from './wsgiApiClient';
-import { User } from './wsgiApiClient';
+import { apiRequest } from '../wsgiApiClient';
+import { User } from '../wsgiApiClient';
 
 // User API methods
 export const userApi = {
