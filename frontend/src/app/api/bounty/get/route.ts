@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { Bounty } from '@/models/Bounty';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   let client;
   try {
     // Import pg client dynamically to avoid server-side issues

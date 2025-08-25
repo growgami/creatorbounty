@@ -37,7 +37,7 @@ interface ExtendedUser extends NextAuthUser {
 }
 
 // Define the NextAuth configuration
-export const authOptions = {
+const authOptions = {
   // Configure authentication providers
   providers: [
     TwitterProvider({

@@ -100,9 +100,8 @@ const RBACModal: React.FC<RBACModalProps> = ({
               <AuraButton
                 variant="white"
                 size="lg"
-                onClick={handleContinue}
-                disabled={!role}
-                className="w-full justify-center py-4 text-lg"
+                onClick={role ? handleContinue : undefined}
+                className={`w-full justify-center py-4 text-lg ${!role ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 Continue as {role ? role.charAt(0).toUpperCase() + role.slice(1) : '...'}
               </AuraButton>

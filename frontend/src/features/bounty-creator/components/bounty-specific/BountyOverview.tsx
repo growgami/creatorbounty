@@ -5,10 +5,12 @@ import ProgressBar from '../ui/ProgressBar';
 import SubmissionModal from '../../modals/SubmissionModal';
 import SubmissionStatus from './SubmissionStatus';
 import { useSubmitEntry } from '../../hooks/useSubmitEntry';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import AuraButton from '@/components/ui/AuraButton';
 
 interface BountyOverviewProps {
   bountyData: BountyData;
+  bountyId: string;
   className?: string;
 }
 
@@ -18,10 +20,12 @@ interface BountyOverviewProps {
  */
 const BountyOverview: React.FC<BountyOverviewProps> = ({
   bountyData,
+  bountyId,
   className = ""
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { submitEntry, hasActiveSubmission, latestSubmission } = useSubmitEntry();
+  const { user } = useAuth();
   const defaultRequirements = [
     { id: '1', text: 'Include #PlasmaTestnet hashtag' },
     { id: '2', text: 'Video length ≥ 10 seconds' },
@@ -107,13 +111,18 @@ const BountyOverview: React.FC<BountyOverviewProps> = ({
 
 
         {/* Submission Modal */}
-        <SubmissionModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleSubmission}
-          requirements={defaultRequirements}
-          bountyTitle={bountyData.title}
-        />
+        {user && (
+          <SubmissionModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={handleSubmission}
+            requirements={defaultRequirements}
+            bountyTitle={bountyData.title}
+            bountyId={bountyId}
+            creator={user.username}
+            creatorPfp={user.userPfp}
+          />
+        )}
       </div>
     </div>
   );

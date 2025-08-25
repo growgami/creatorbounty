@@ -24,7 +24,7 @@ const Navbar: React.FC<NavbarProps> = ({
           <li><a href="#" className="text-gray-400 hover:text-gray-300 font-space-grotesk">Settings</a></li>
         </ul>
         <div className="flex items-center space-x-3">
-          <UserMenu userInitial="A" />
+          <UserMenu />
         </div>
       </div>
     </nav>

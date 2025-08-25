@@ -72,6 +72,7 @@ async function checkAdminConfig(username: string): Promise<boolean> {
     
     return config.admins.includes(username);
   } catch (error) {
+    console.log('Error checking admin config:', error);
     // Config file doesn't exist or is invalid, check environment variables
     const envAdmins = process.env.ADMIN_TWITTER_USERNAMES;
     if (envAdmins) {

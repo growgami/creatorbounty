@@ -131,7 +131,7 @@ const BountiesClient: React.FC<BountiesClientProps> = ({ className = '' }) => {
                 <li><a href="#" className="text-gray-400 hover:text-gray-300 font-space-grotesk">Earnings</a></li>
               </ul>
               <div className="flex items-center space-x-3">
-                <UserMenu userInitial="C" />
+                <UserMenu />
               </div>
             </div>
           </nav>
@@ -162,6 +162,7 @@ const BountiesClient: React.FC<BountiesClientProps> = ({ className = '' }) => {
           <div className="mb-8">
             <BountyOverview 
               bountyData={bountyData}
+              bountyId={bountyId || ''}
             />
           </div>
 

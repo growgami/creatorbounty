@@ -105,14 +105,14 @@ const SubmissionStatus: React.FC<SubmissionStatusProps> = ({
                 {statusConfig.label}
               </h3>
               <p className="text-sm text-gray-400">
-                Submitted {formatDate(submission.submittedAt)}
+                Submitted {formatDate(new Date(submission.createdAt))}
               </p>
             </div>
           </div>
           
-          {/* TikTok Link */}
+          {/* Submission Link */}
           <a
-            href={submission.tiktokUrl}
+            href={submission.submitted_url}
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-white transition-colors"
@@ -124,17 +124,14 @@ const SubmissionStatus: React.FC<SubmissionStatusProps> = ({
         {/* Status Description */}
         <p className="text-gray-300 mb-6">{statusConfig.description}</p>
 
-        {/* Rejection Reason */}
-        {submission.status === 'rejected' && submission.rejectionReason && (
+        {/* Rejection Notice */}
+        {submission.status === 'rejected' && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
-            <h4 className="font-medium text-red-400 mb-2">Rejection Reason</h4>
-            <p className="text-sm text-red-300 mb-2">{submission.rejectionReason}</p>
-            {submission.notes && (
-              <div>
-                <h5 className="font-medium text-red-400 text-xs mb-1">Additional Notes</h5>
-                <p className="text-xs text-red-300">{submission.notes}</p>
-              </div>
-            )}
+            <h4 className="font-medium text-red-400 mb-2">Submission Rejected</h4>
+            <p className="text-sm text-red-300">
+              Your submission was reviewed and did not meet the campaign requirements. 
+              Please review the campaign guidelines and consider submitting a new entry.
+            </p>
           </div>
         )}
 

@@ -9,6 +9,9 @@ interface SubmissionModalProps {
   onSubmit: (data: SubmissionFormData) => Promise<void>;
   requirements: Requirement[];
   bountyTitle: string;
+  bountyId: string;
+  creator: string;
+  creatorPfp: string;
 }
 
 /**
@@ -20,11 +23,17 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
   onClose,
   onSubmit,
   requirements,
-  bountyTitle
+  bountyTitle,
+  bountyId,
+  creator,
+  creatorPfp
 }) => {
   const [formData, setFormData] = useState<SubmissionFormData>({
     tiktokUrl: '',
-    agreedToTerms: false
+    agreedToTerms: false,
+    bountyId,
+    creator,
+    creatorPfp
   });
   const [validation, setValidation] = useState<ValidationResult>({
     isValid: false,
@@ -37,12 +46,18 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
   // Reset form when modal opens/closes
   useEffect(() => {
     if (!isOpen) {
-      setFormData({ tiktokUrl: '', agreedToTerms: false });
+      setFormData({ 
+        tiktokUrl: '', 
+        agreedToTerms: false,
+        bountyId,
+        creator,
+        creatorPfp
+      });
       setValidation({ isValid: false, errors: [], warnings: [] });
       setIsSubmitting(false);
       setSubmitSuccess(false);
     }
-  }, [isOpen]);
+  }, [isOpen, bountyId, creator, creatorPfp]);
 
   // Validate TikTok URL
   const validateTikTokUrl = (url: string): ValidationResult => {

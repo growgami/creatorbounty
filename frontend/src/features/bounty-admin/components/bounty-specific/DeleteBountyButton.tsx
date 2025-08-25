@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Trash2 } from 'lucide-react';
 import AuraButton from '@/components/ui/AuraButton';
 import { useDeleteBounty } from '@/features/bounty-admin/hooks/bounty-actions/useDeleteBounty';
 
