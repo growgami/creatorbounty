@@ -24,7 +24,7 @@ const BountyOverview: React.FC<BountyOverviewProps> = ({
   className = ""
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { submitEntry, hasActiveSubmission, latestSubmission } = useSubmitEntry();
+  const { submitEntry, hasActiveSubmission, latestSubmission } = useSubmitEntry(bountyId);
   const { user } = useAuth();
   const defaultRequirements = [
     { id: '1', text: 'Include #PlasmaTestnet hashtag' },

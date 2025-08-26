@@ -4,8 +4,9 @@ import { SubmissionWithRelationships } from '@/models/Relationships';
 import { Submission } from '@/models/Submissions';
 
 // API functions for submissions
-const fetchSubmissions = async (): Promise<SubmissionWithRelationships[]> => {
-  const response = await fetch('/api/submissions');
+const fetchSubmissions = async (bountyId?: string): Promise<SubmissionWithRelationships[]> => {
+  const url = bountyId ? `/api/submissions?bountyId=${bountyId}` : '/api/submissions';
+  const response = await fetch(url);
   
   if (!response.ok) {
     throw new Error('Failed to fetch submissions');
@@ -65,8 +66,9 @@ interface UseSubmitEntryReturn {
 /**
  * Custom hook for managing submission state and operations
  * Handles submission creation, validation, and status tracking using React Query
+ * @param bountyId - Optional bounty ID to filter submissions for a specific bounty
  */
-export const useSubmitEntry = (): UseSubmitEntryReturn => {
+export const useSubmitEntry = (bountyId?: string): UseSubmitEntryReturn => {
   const queryClient = useQueryClient();
   
   // Fetch submissions
@@ -76,8 +78,8 @@ export const useSubmitEntry = (): UseSubmitEntryReturn => {
     isError, 
     error 
   } = useQuery<SubmissionWithRelationships[], Error>({
-    queryKey: ['submissions'],
-    queryFn: fetchSubmissions,
+    queryKey: ['submissions', bountyId],
+    queryFn: () => fetchSubmissions(bountyId),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
@@ -86,13 +88,13 @@ export const useSubmitEntry = (): UseSubmitEntryReturn => {
     mutationFn: submitEntryAPI,
     onSuccess: (newSubmission) => {
       // Update the submissions cache with the new submission
-      queryClient.setQueryData<SubmissionWithRelationships[]>(['submissions'], (oldSubmissions = []) => [
+      queryClient.setQueryData<SubmissionWithRelationships[]>(['submissions', bountyId], (oldSubmissions = []) => [
         newSubmission,
         ...oldSubmissions
       ]);
       
       // Optionally invalidate the query to refetch
-      // queryClient.invalidateQueries(['submissions']);
+      // queryClient.invalidateQueries(['submissions', bountyId]);
     },
     onError: (error) => {
       console.error('Failed to submit entry:', error);
