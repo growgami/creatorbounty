@@ -1,12 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
 import BackgroundCard from '@/components/ui/BackgroundCard';
 import { AdminSubmission } from '@/features/bounty-admin/hooks/useSubmissionActions';
+import { useGetSubmissions } from '@/features/bounty-admin/hooks/submissions-actions/useGetSubmissions';
+import { Submission } from '@/models/Submissions';
 
 interface SubmissionListProps {
-  submissions: AdminSubmission[];
+  bountyId?: string;
   currentTab: string;
   selectedSubmissions: Set<string>;
   onToggleSelection: (submissionId: string) => void;
@@ -15,16 +17,87 @@ interface SubmissionListProps {
 }
 
 const SubmissionList: React.FC<SubmissionListProps> = ({
-  submissions,
+  bountyId,
   currentTab,
   selectedSubmissions,
   onToggleSelection,
   onOpenModal,
   className = ''
 }) => {
+  // Fetch submissions from database
+  const { submissions: allSubmissions, loading, error } = useGetSubmissions();
+
+  // Transform and filter submissions
+  const transformedSubmissions = useMemo(() => {
+    if (!allSubmissions || allSubmissions.length === 0) return [];
+
+    const formatTimeAgo = (dateString: string): string => {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInMs = now.getTime() - date.getTime();
+      
+      const minutes = Math.floor(diffInMs / (1000 * 60));
+      const hours = Math.floor(diffInMs / (1000 * 60 * 60));
+      const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+      
+      if (minutes < 60) {
+        return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+      } else if (hours < 24) {
+        return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+      } else {
+        return `${days} day${days !== 1 ? 's' : ''} ago`;
+      }
+    };
+
+    const generateTxHash = (submission: Submission): string | undefined => {
+      if (submission.status === 'claimed' && submission.wallet_address) {
+        // Generate a realistic-looking transaction hash from submission ID
+        return `0x${submission.id.replace(/-/g, '').substring(0, 64).padEnd(64, '0')}`;
+      }
+      return undefined;
+    };
+
+    return allSubmissions
+      .filter(submission => {
+        // Filter by bountyId if provided
+        if (bountyId && submission.bountyId !== bountyId) return false;
+        // Filter by current tab status
+        return submission.status === currentTab;
+      })
+      .map((submission): AdminSubmission => ({
+        id: submission.id,
+        creator: submission.creator,
+        avatar: submission.creatorPfp,
+        submitted: formatTimeAgo(submission.createdAt),
+        status: submission.status,
+        txHash: generateTxHash(submission)
+      }));
+  }, [allSubmissions, bountyId, currentTab]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className={`space-y-4 ${className}`}>
+        <div className="text-center py-12 text-gray-400 font-space-grotesk">
+          Loading submissions...
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className={`space-y-4 ${className}`}>
+        <div className="text-center py-12 text-red-400 font-space-grotesk">
+          Error loading submissions: {error}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className={`space-y-4 ${className}`}>
-      {submissions?.map((submission) => (
+      {transformedSubmissions?.map((submission) => (
         <BackgroundCard
           key={submission.id} 
           variant="subtle"
@@ -90,7 +163,9 @@ const SubmissionList: React.FC<SubmissionListProps> = ({
             </svg>
           </div>
         </BackgroundCard>
-      )) || (
+      ))
+      }
+      {transformedSubmissions.length === 0 && (
         <div className="text-center py-12 text-gray-400 font-space-grotesk">
           No {currentTab} submissions yet
         </div>

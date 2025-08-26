@@ -270,7 +270,7 @@ const AdminBounties: React.FC<AdminBountiesProps> = ({
 
           {/* Submissions List */}
           <SubmissionList
-            submissions={submissions[currentTab] || []}
+            bountyId={bountyId || undefined}
             currentTab={currentTab}
             selectedSubmissions={selectedSubmissions}
             onToggleSelection={toggleSubmissionSelection}

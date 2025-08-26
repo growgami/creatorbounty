@@ -1,56 +1,54 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SubmissionFormData, SubmissionData, SubmissionStatus } from '../types/types';
 import { SubmissionWithRelationships } from '@/models/Relationships';
+import { Submission } from '@/models/Submissions';
 
-// Mock API functions - these should be replaced with actual API calls
+// API functions for submissions
 const fetchSubmissions = async (): Promise<SubmissionWithRelationships[]> => {
-  // TODO: Replace with actual API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const mockSubmissions: SubmissionData[] = JSON.parse(localStorage.getItem('submissions') || '[]');
-      // Convert SubmissionData to SubmissionWithRelationships
-      const submissionsWithRelationships: SubmissionWithRelationships[] = mockSubmissions.map(sub => ({
-        ...sub,
-        // In a real implementation, we would fetch the related bounty and creator user
-        bounty: undefined,
-        creatorUser: undefined
-      }));
-      resolve(submissionsWithRelationships);
-    }, 1500);
-  });
+  const response = await fetch('/api/submissions');
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch submissions');
+  }
+  
+  const data = await response.json();
+  
+  // Convert Submission to SubmissionWithRelationships
+  const submissionsWithRelationships: SubmissionWithRelationships[] = data.submissions.map((sub: Submission) => ({
+    ...sub,
+    // In a real implementation, we would fetch the related bounty and creator user
+    bounty: undefined,
+    creatorUser: undefined
+  }));
+  
+  return submissionsWithRelationships;
 };
 
 const submitEntryAPI = async (formData: SubmissionFormData): Promise<SubmissionWithRelationships> => {
-  // TODO: Replace with actual API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const now = new Date().toISOString();
-      const newSubmission: SubmissionWithRelationships = {
-        id: `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        bountyId: formData.bountyId,
-        creator: formData.creator,
-        creatorPfp: formData.creatorPfp,
-        submitted_url: formData.tiktokUrl,
-        status: 'pending' as SubmissionStatus,
-        createdAt: now,
-        updatedAt: now,
-        // In a real implementation, we would fetch the related bounty and creator user
-        bounty: undefined,
-        creatorUser: undefined
-      };
-      
-      // Get existing submissions from localStorage
-      const existingSubmissions: SubmissionData[] = JSON.parse(localStorage.getItem('submissions') || '[]');
-      
-      // Add new submission to the beginning of the array
-      const updatedSubmissions = [newSubmission, ...existingSubmissions];
-      
-      // Save to localStorage
-      localStorage.setItem('submissions', JSON.stringify(updatedSubmissions));
-      
-      resolve(newSubmission);
-    }, 1500);
+  const response = await fetch('/api/submissions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formData),
   });
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to submit entry');
+  }
+  
+  const data = await response.json();
+  
+  // Convert Submission to SubmissionWithRelationships
+  const submissionWithRelationships: SubmissionWithRelationships = {
+    ...data.submission,
+    // In a real implementation, we would fetch the related bounty and creator user
+    bounty: undefined,
+    creatorUser: undefined
+  };
+  
+  return submissionWithRelationships;
 };
 
 interface UseSubmitEntryReturn {

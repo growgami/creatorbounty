@@ -15,20 +15,6 @@ export interface Requirement {
   completed?: boolean;
 }
 
-export type TabKey = 'available' | 'submitted' | 'claimed';
-
-export interface Tab {
-  key: TabKey;
-  label: string;
-}
-
-export interface EmptyStateConfig {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  iconBgColor: string;
-  iconColor: string;
-}
 
 export type SubmissionStatus = 'pending' | 'claimed' | 'rejected';
 

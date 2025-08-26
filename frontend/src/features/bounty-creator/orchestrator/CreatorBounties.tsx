@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import BountyOverview from '@/features/bounty-creator/components/bounty-specific/BountyOverview';
-import TabNavigation from '@/features/bounty-creator/components/tabs/TabNavigation';
-import TabContent from '@/features/bounty-creator/components/tabs/TabContent';
 import UserMenu from '@/components/layouts/UserMenu';
 import AnimatedGridBackground from '@/components/backgrounds/AnimatedGridBackground';
-import { BountyData, TabKey, Tab } from '@/features/bounty-creator/types/types';
+import { BountyData } from '@/features/bounty-creator/types/types';
 import { useBountyById } from '@/features/bounty-admin/hooks/bounty-actions/useGetBountyById';
 
 
@@ -24,7 +22,6 @@ const BountiesClient: React.FC<BountiesClientProps> = ({ className = '' }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const bountyId = searchParams.get('bounty');
-  const [activeTab, setActiveTab] = useState<TabKey>('submitted');
 
   // Fetch actual bounty data
   const { bounty: fetchedBounty, isLoading, isError, error } = useBountyById(bountyId);
@@ -92,18 +89,6 @@ const BountiesClient: React.FC<BountiesClientProps> = ({ className = '' }) => {
     endDate: 'Ends in 7 days'
   };
 
-  // Tab configuration
-  const tabs: Tab[] = [
-    { key: 'submitted', label: 'My Submissions' },
-    { key: 'claimed', label: 'Claimed Rewards' }
-  ];
-
-
-
-  // Handle tab change
-  const handleTabChange = (tab: TabKey) => {
-    setActiveTab(tab);
-  };
 
   return (
     <div className={`min-h-screen bg-[#222] relative ${className}`}>
@@ -166,17 +151,6 @@ const BountiesClient: React.FC<BountiesClientProps> = ({ className = '' }) => {
             />
           </div>
 
-          {/* Tabs Navigation */}
-          <div className="border-b border-white/10 mb-8">
-            <TabNavigation 
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-            />
-          </div>
-
-          {/* Tab Content */}
-          <TabContent activeTab={activeTab} />
         </div>
       </main>
     </div>

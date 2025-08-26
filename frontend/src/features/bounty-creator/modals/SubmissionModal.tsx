@@ -228,12 +228,12 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
 
             {/* Terms Agreement */}
             <div className="mb-6">
-              <label className="flex items-start space-x-3 cursor-pointer">
+              <label className="flex items-start space-x-3 cursor-pointer relative z-10">
                 <input
                   type="checkbox"
                   checked={formData.agreedToTerms}
                   onChange={handleTermsChange}
-                  className="mt-1 w-4 h-4 text-blue-600 bg-[#0a0a0a] border-white/10 rounded focus:ring-blue-500 focus:ring-2"
+                  className="mt-1 w-4 h-4 text-blue-600 bg-[#0a0a0a] border border-white/20 rounded focus:ring-blue-500 focus:ring-2 relative z-10 cursor-pointer"
                 />
                 <span className="text-sm text-gray-300">
                   I confirm that my content meets all requirements and I agree to the{' '}
@@ -245,7 +245,7 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
             </div>
 
             {/* Submit Button */}
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end space-x-3 relative z-10">
               <Button
                 type="button"
                 onClick={onClose}
