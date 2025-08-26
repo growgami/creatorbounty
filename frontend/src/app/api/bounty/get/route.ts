@@ -18,14 +18,25 @@ export async function GET() {
 
     await client.connect();
 
-    // Query to fetch all bounties
+    // Query to fetch all bounties with real-time submission counts
     const query = `
       SELECT 
-        id, title, description, bounty_pool, token_symbol, status,
-        created_at, updated_at, end_date, created_by, requirements,
-        submissions_count, total_submissions, completion_percentage
-      FROM bounties
-      ORDER BY created_at DESC;
+        b.id, b.title, b.description, b.bounty_pool, b.token_symbol, b.status,
+        b.created_at, b.updated_at, b.end_date, b.created_by, b.requirements,
+        b.total_submissions,
+        COALESCE(s.submission_count, 0) as submissions_count,
+        CASE 
+          WHEN b.total_submissions > 0 THEN 
+            ROUND(CAST((COALESCE(s.submission_count, 0) * 100.0 / b.total_submissions) AS NUMERIC), 2)
+          ELSE 0 
+        END as completion_percentage
+      FROM bounties b
+      LEFT JOIN (
+        SELECT bounty_id, COUNT(*) as submission_count 
+        FROM submissions 
+        GROUP BY bounty_id
+      ) s ON b.id = s.bounty_id
+      ORDER BY b.created_at DESC;
     `;
 
     const result = await client.query(query);

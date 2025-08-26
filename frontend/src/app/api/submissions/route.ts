@@ -140,6 +140,26 @@ export async function POST(request: Request) {
     const result = await client.query(insertQuery, values);
     const row = result.rows[0];
 
+    // Update bounty submission count and completion percentage
+    const updateBountyQuery = `
+      UPDATE bounties 
+      SET 
+        submissions_count = (
+          SELECT COUNT(*) FROM submissions WHERE bounty_id = $1
+        ),
+        completion_percentage = (
+          CASE 
+            WHEN total_submissions > 0 THEN 
+              ROUND(CAST(((SELECT COUNT(*) FROM submissions WHERE bounty_id = $1) * 100.0 / total_submissions) AS NUMERIC), 2)
+            ELSE 0 
+          END
+        ),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1;
+    `;
+    
+    await client.query(updateBountyQuery, [body.bountyId]);
+
     // Transform database row to match Submission model
     const newSubmission: Submission = {
       id: row.id,
@@ -229,6 +249,26 @@ export async function PATCH(request: Request) {
     }
 
     const row = result.rows[0];
+
+    // Update bounty submission count and completion percentage
+    const updateBountyQuery = `
+      UPDATE bounties 
+      SET 
+        submissions_count = (
+          SELECT COUNT(*) FROM submissions WHERE bounty_id = $1
+        ),
+        completion_percentage = (
+          CASE 
+            WHEN total_submissions > 0 THEN 
+              ROUND(CAST(((SELECT COUNT(*) FROM submissions WHERE bounty_id = $1) * 100.0 / total_submissions) AS NUMERIC), 2)
+            ELSE 0 
+          END
+        ),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1;
+    `;
+    
+    await client.query(updateBountyQuery, [row.bounty_id]);
 
     // Transform database row to match Submission model
     const updatedSubmission: Submission = {

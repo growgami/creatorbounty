@@ -121,6 +121,46 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_bounties_updated_at BEFORE UPDATE
 ON bounties FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
+-- Automatic bounty progress tracking triggers
+-- Function to update bounty submission counts when submissions change
+CREATE OR REPLACE FUNCTION update_bounty_submission_counts()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Update the bounty's submission count and completion percentage
+  UPDATE bounties 
+  SET 
+    submissions_count = (
+      SELECT COUNT(*) FROM submissions WHERE bounty_id = COALESCE(NEW.bounty_id, OLD.bounty_id)
+    ),
+    completion_percentage = (
+      CASE 
+        WHEN total_submissions > 0 THEN 
+          ROUND(CAST(((SELECT COUNT(*) FROM submissions WHERE bounty_id = COALESCE(NEW.bounty_id, OLD.bounty_id)) * 100.0 / total_submissions) AS NUMERIC), 2)
+        ELSE 0 
+      END
+    ),
+    updated_at = CURRENT_TIMESTAMP
+  WHERE id = COALESCE(NEW.bounty_id, OLD.bounty_id);
+  
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ language 'plpgsql';
+
+-- Trigger for submission inserts
+CREATE TRIGGER update_bounty_counts_on_insert AFTER INSERT
+ON submissions FOR EACH ROW
+EXECUTE FUNCTION update_bounty_submission_counts();
+
+-- Trigger for submission updates
+CREATE TRIGGER update_bounty_counts_on_update AFTER UPDATE
+ON submissions FOR EACH ROW
+EXECUTE FUNCTION update_bounty_submission_counts();
+
+-- Trigger for submission deletes
+CREATE TRIGGER update_bounty_counts_on_delete AFTER DELETE
+ON submissions FOR EACH ROW
+EXECUTE FUNCTION update_bounty_submission_counts();
 `;
 
 // Function to construct PostgreSQL URI from environment variables

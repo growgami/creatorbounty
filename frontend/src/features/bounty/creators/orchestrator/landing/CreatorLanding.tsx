@@ -72,11 +72,8 @@ const LandingPage: React.FC<LandingPageProps> = ({
     );
   }
 
-  // Map bounties to campaigns (ensure status is not undefined)
-  const campaigns = bounties.map(bounty => ({
-    ...bounty,
-    status: bounty.status || 'active' // Default to 'active' if status is undefined
-  }));
+  // Use bounties directly - API now provides complete data including submission counts
+  const campaigns = bounties;
 
   return (
     <div className={`min-h-screen bg-[#222] relative ${className}`}>
