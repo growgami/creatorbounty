@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tab, TabKey } from '../../types/types';
+import { Tab, TabKey } from '@/features/bounty/creators/types/types';
 
 interface TabNavigationProps {
   tabs: Tab[];

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { BountyData, SubmissionFormData } from '../../types/types';
 import RequirementsList from './RequirementsList';
-import ProgressBar from '../ui/ProgressBar';
-import SubmissionModal from '@/features/bounty/creators/components/modals/SubmissionModal';
+import ProgressBar from '../states/ProgressBar';
+import SubmissionModal from '@/features/bounty/creators/components/submission/SubmissionModal';
 import SubmissionStatus from './SubmissionStatus';
 import { useSubmitEntry } from '@/features/bounty/creators/hooks/useSubmitEntry';
 import { useAuth } from '@/features/auth/hooks/useAuth';

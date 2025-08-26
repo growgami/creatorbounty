@@ -7,16 +7,16 @@ import ReviewModal from '@/features/bounty/admins/components/modals/ReviewModal'
 import EnhancedToast from '@/components/shared/notifications/Toast';
 import AnimatedGridBackground from '@/components/shared/backgrounds/AnimatedGridBackground';
 import UserMenu from '@/components/layouts/UserMenu';
-import TabStrip from '@/features/bounty/admins/components/bounty-specific/TabStrip';
-import BulkActionBar from '@/features/bounty/admins/components/bounty-specific/BulkActionBar';
-import SubmissionList from '@/features/bounty/admins/components/bounty-specific/SubmitterList';
-import DeleteBountyButton from '@/features/bounty/admins/components/bounty-specific/DeleteBountyButton';
+import TabStrip from '@/features/bounty/admins/components/bounty-management/TabStrip';
+import BulkActionBar from '@/features/bounty/admins/components/bounty-management/BulkActionBar';
+import SubmissionList from '@/features/bounty/admins/components/bounty-management/SubmitterList';
+import DeleteBountyButton from '@/features/bounty/admins/components/bounty-management/DeleteBountyButton';
 import { useSubmission, AdminSubmission } from '@/features/bounty/admins/hooks/useSubmissionActions';
 import { Bounty } from '@/models/Bounty';
 import { Submission } from '@/models/Submissions';
 import { useBountyById } from '@/features/bounty/admins/hooks/bounty-actions/useGetBountyById';
 import { useGetSubmissions } from '@/features/bounty/admins/hooks/submissions-actions/useGetSubmissions';
-import { useTotalSubmissionCount } from '@/features/bounty/admins/components/lib/totalSubmissionCount';
+import { useTotalSubmissionCount } from '@/features/bounty/admins/utils/totalSubmissionCount';
 
 interface AdminBountiesProps {
   className?: string;

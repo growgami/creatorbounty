@@ -3,12 +3,41 @@
 import React from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { FadeIn, SlideUp } from '@/components/effects/animations/FadeInTransition';
-import Stats from '@/features/bounty/creators/components/ui/Stats';
+import Stats from '@/features/bounty/creators/components/states/Stats';
 import AnimatedGridBackground from '@/components/shared/backgrounds/AnimatedGridBackground';
 import BountiesClient from '@/features/bounty/creators/orchestrator/home/CreatorBounties';
 import Navbar from '@/components/layouts/Navbar';
 import CampaignCards from '@/components/containers/BountyCardContainer';
 import { useBounties } from '@/features/bounty/admins/hooks/bounty-actions/useGetBounties';
+import type { Bounty } from '@/models/Bounty';
+
+// Campaign type from BountyCardContainer
+type CampaignStatus = 'active' | 'upcoming' | 'ended' | 'completed' | 'draft' | 'paused';
+
+interface Campaign {
+  id: string;
+  title: string;
+  description: string;
+  bountyPool: number;
+  tokenSymbol: string;
+  submissionsCount: number;
+  totalSubmissions: number;
+  status: CampaignStatus;
+  completionPercentage: number;
+}
+
+// Transform Bounty to Campaign
+const transformToCampaign = (bounty: Bounty): Campaign => ({
+  id: bounty.id,
+  title: bounty.title,
+  description: bounty.description,
+  bountyPool: bounty.bountyPool,
+  tokenSymbol: bounty.tokenSymbol,
+  submissionsCount: bounty.submissionsCount,
+  totalSubmissions: bounty.totalSubmissions,
+  status: (bounty.status || 'active') as CampaignStatus,
+  completionPercentage: bounty.completionPercentage
+});
 
 interface LandingPageProps {
   className?: string;
@@ -72,11 +101,12 @@ const LandingPage: React.FC<LandingPageProps> = ({
     );
   }
 
-  // Use bounties directly - API now provides complete data including submission counts
-  const campaigns = bounties;
+  // Transform bounties to campaigns - API now provides complete data including submission counts
+  const campaigns = bounties.map(transformToCampaign);
 
   return (
     <div className={`min-h-screen bg-[#222] relative ${className}`}>
+
       {/* Animated Grid Background */}
       <AnimatedGridBackground />
       

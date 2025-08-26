@@ -43,3 +43,10 @@ export interface ValidationResult {
   errors: string[];
   warnings?: string[];
 }
+
+export type TabKey = 'available' | 'submitted' | 'claimed';
+
+export interface Tab {
+  key: TabKey;
+  label: string;
+}

@@ -9,11 +9,10 @@ import Navbar from '@/components/layouts/Navbar';
 import CampaignCards from '@/components/containers/BountyCardContainer';
 import AdminBounties from '@/features/bounty/admins/orchestrators/home/AdminBounties';
 import { useBounties } from '@/features/bounty/admins/hooks/bounty-actions/useGetBounties';
-import { useGetSubmissions } from '@/features/bounty/admins/hooks/submissions-actions/useGetSubmissions';
-import { calculateTotalSubmissionCount } from '@/features/bounty/admins/components/lib/totalSubmissionCount';
 import AuraButton from '@/components/shared/ui/AuraButton';
-import BountyForm from '@/features/bounty/admins/components/modals/BountyFormModal';
+import BountyForm from '@/features/bounty/admins/components/forms/BountyFormModal';
 import EnhancedToast from '@/components/shared/notifications/Toast';
+
 
 interface LandingPageProps {
   className?: string;
@@ -34,8 +33,6 @@ const LandingPage: React.FC<LandingPageProps> = ({
   // Use the bounties hook for fetching admin bounties
   const { bounties, isLoading, isError, error, refetch } = useBounties();
   
-  // Fetch submissions to calculate real-time progress
-  const { submissions: apiSubmissions, loading: loadingSubmissions } = useGetSubmissions();
   
   // If bounty query param exists, show the bounty orchestrator
   if (bounty) {
@@ -64,7 +61,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   // Show loading state
-  if (isLoading || loadingSubmissions) {
+  if (isLoading) {
     return (
       <div className={`min-h-screen bg-[#222] relative ${className}`}>
         <AnimatedGridBackground />
@@ -97,35 +94,13 @@ const LandingPage: React.FC<LandingPageProps> = ({
     );
   }
 
-  // Group submissions by bounty ID and calculate real submission counts
-  const submissionsByBounty = apiSubmissions.reduce((acc, submission) => {
-    if (acc[submission.bountyId]) {
-      acc[submission.bountyId].push(submission);
-    } else {
-      acc[submission.bountyId] = [submission];
-    }
-    return acc;
-  }, {} as Record<string, typeof apiSubmissions>);
-
-  // Map bounties to campaigns with real-time submission data
-  const campaigns = bounties.map(bounty => {
-    const bountySubmissions = submissionsByBounty[bounty.id] || [];
-    const totalSubmissions = calculateTotalSubmissionCount({ 
-      pending: bountySubmissions.filter(s => s.status === 'pending'),
-      claimed: bountySubmissions.filter(s => s.status === 'claimed'),
-      rejected: bountySubmissions.filter(s => s.status === 'rejected')
-    });
-    const completionPercentage = bounty.totalSubmissions > 0 
-      ? Math.round((totalSubmissions / bounty.totalSubmissions) * 100) 
-      : 0;
-
-    return {
-      ...bounty,
-      status: bounty.status || 'active', // Default to 'active' if status is undefined
-      submissionsCount: totalSubmissions,
-      completionPercentage
-    };
-  });
+  // Map bounties to campaigns with default values (actual counts will be fetched by each card)
+  const campaigns = bounties.map(bounty => ({
+    ...bounty,
+    status: bounty.status || 'active', // Default to 'active' if status is undefined
+    submissionsCount: 0, // This will be calculated by CampaignWithSubmissions component
+    completionPercentage: 0 // This will be calculated by CampaignWithSubmissions component
+  }));
 
   return (
     <div className={`min-h-screen bg-[#222] relative ${className}`}>

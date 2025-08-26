@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import BackgroundCard from '@/components/shared/ui/BackgroundCard';
+import { useGetSubmissions } from '@/features/bounty/admins/hooks/submissions-actions/useGetSubmissions';
 
 type CampaignStatus = 'active' | 'upcoming' | 'ended' | 'completed' | 'draft' | 'paused';
 
@@ -25,6 +26,144 @@ interface CampaignCardsProps {
   onCampaignClick?: (campaignId: string) => void;
   wrapperClassName?: string;
 }
+
+// Component that uses the submission hook for a single campaign
+const CampaignWithSubmissions: React.FC<{
+  campaign: Campaign;
+  className: string;
+  onCampaignClick: (campaignId: string) => void;
+  getStatusBadgeStyle: (status: CampaignStatus) => string;
+  variant: 'grid' | 'single';
+}> = ({ campaign, className, onCampaignClick, getStatusBadgeStyle, variant }) => {
+  const { submissions } = useGetSubmissions(campaign.id);
+  const actualSubmissionCount = submissions.length;
+  const completionPercentage = campaign.totalSubmissions > 0 
+    ? Math.round((actualSubmissionCount / campaign.totalSubmissions) * 100) 
+    : 0;
+
+  if (variant === 'single') {
+    return (
+      <BackgroundCard
+        variant="hover"
+        onClick={() => onCampaignClick(campaign.id)}
+        className={`p-8 ${className}`}
+      >
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <div className="flex items-center space-x-3 mb-2">
+              <h2 className="text-xl font-semibold tracking-tight text-white font-space-grotesk">{campaign.title}</h2>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium font-space-grotesk ${getStatusBadgeStyle(campaign.status)}`}>
+                {campaign.status}
+              </span>
+            </div>
+            <p className="text-gray-400 font-space-grotesk">{campaign.description}</p>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <div className="flex justify-between text-sm mb-2">
+              <span className="text-gray-400 font-space-grotesk">Progress</span>
+              <span 
+                className="font-medium text-white font-space-grotesk cursor-help" 
+                title={`${actualSubmissionCount} / ${campaign.totalSubmissions} submissions (${completionPercentage}%)`}
+              >
+                {actualSubmissionCount} / {campaign.totalSubmissions} submissions
+              </span>
+            </div>
+            <div 
+              className="w-full bg-gray-700/50 rounded-full h-2 hover:bg-gray-600/50 transition-colors cursor-help" 
+              title={`${actualSubmissionCount} / ${campaign.totalSubmissions} submissions (${completionPercentage}%)`}
+            >
+              <div 
+                className="bg-gradient-to-r from-cyan-400 to-cyan-300 h-2 rounded-full transition-all duration-500" 
+                style={{ width: `${Math.min(completionPercentage, 100)}%` }}
+              ></div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-8 text-sm">
+            <div>
+              <p className="text-2xl text-white font-space-grotesk font-semibold">{campaign.bountyPool.toLocaleString()}</p>
+              <p className="text-gray-400 font-space-grotesk">{campaign.tokenSymbol} pool</p>
+            </div>
+            <div className="w-px h-8 bg-gray-600"></div>
+            <div>
+              <p className="text-2xl text-white font-space-grotesk font-semibold">{actualSubmissionCount}</p>
+              <p className="text-gray-400 font-space-grotesk">submissions</p>
+            </div>
+          </div>
+        </div>
+      </BackgroundCard>
+    );
+  }
+
+  // Grid variant
+  return (
+    <BackgroundCard
+      variant="hover"
+      onClick={() => onCampaignClick(campaign.id)}
+      className={`group ${className}`}
+    >
+      {/* Status Badge */}
+      <div className="flex justify-between items-start mb-4">
+        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider font-space-grotesk ${getStatusBadgeStyle(campaign.status)}`}>
+          {campaign.status}
+        </span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 group-hover:text-gray-300 transition-colors">
+          <path d="m9 18 6-6-6-6"></path>
+        </svg>
+      </div>
+
+      {/* Title & Description */}
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold text-white mb-2 font-space-grotesk group-hover:text-gray-100 transition-colors">
+          {campaign.title}
+        </h3>
+        <p className="text-gray-400 text-sm font-space-grotesk">
+          {campaign.description}
+        </p>
+      </div>
+
+      {/* Bounty Pool */}
+      <div className="mb-6">
+        <div className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-medium font-space-grotesk">Bounty Pool</div>
+        <div className="text-white text-2xl font-bold tracking-tight font-space-grotesk">
+          <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            {campaign.bountyPool.toLocaleString()}
+          </span>
+          <span className="text-gray-400 text-base ml-2 font-medium">{campaign.tokenSymbol}</span>
+        </div>
+      </div>
+
+      {/* Progress */}
+      <div>
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-gray-500 text-xs uppercase tracking-wider font-medium font-space-grotesk">Progress</span>
+          <span className="text-white text-sm font-semibold font-space-grotesk">
+            {actualSubmissionCount} / {campaign.totalSubmissions} submissions
+          </span>
+        </div>
+        <div 
+          className="w-full bg-gray-700/50 rounded-full h-2 mb-2 hover:bg-gray-600/50 transition-colors cursor-help" 
+          title={`${actualSubmissionCount} / ${campaign.totalSubmissions} submissions (${completionPercentage}%)`}
+        >
+          <div 
+            className="bg-gradient-to-r from-cyan-400 to-cyan-300 h-2 rounded-full transition-all duration-500"
+            style={{ width: `${Math.min(completionPercentage, 100)}%` }}
+          ></div>
+        </div>
+        <div className="text-gray-400 text-xs text-right font-space-grotesk">
+          {completionPercentage}% complete
+        </div>
+      </div>
+
+      {/* Hover Effect */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-2xl"></div>
+    </BackgroundCard>
+  );
+};
 
 const CampaignCards: React.FC<CampaignCardsProps> = ({ 
   className = '',
@@ -81,130 +220,32 @@ const CampaignCards: React.FC<CampaignCardsProps> = ({
     return (
       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${wrapperClassName}`}>
         {displayCampaigns.map((campaign) => (
-          <BackgroundCard
+          <CampaignWithSubmissions
             key={campaign.id}
-            variant="hover"
-            onClick={() => handleCampaignClick(campaign.id)}
-            className={`group ${className}`}
-          >
-            {/* Status Badge */}
-            <div className="flex justify-between items-start mb-4">
-              <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider font-space-grotesk ${getStatusBadgeStyle(campaign.status)}`}>
-                {campaign.status}
-              </span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 group-hover:text-gray-300 transition-colors">
-                <path d="m9 18 6-6-6-6"></path>
-              </svg>
-            </div>
-
-            {/* Title & Description */}
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold text-white mb-2 font-space-grotesk group-hover:text-gray-100 transition-colors">
-                {campaign.title}
-              </h3>
-              <p className="text-gray-400 text-sm font-space-grotesk">
-                {campaign.description}
-              </p>
-            </div>
-
-            {/* Bounty Pool */}
-            <div className="mb-6">
-              <div className="text-gray-500 text-xs uppercase tracking-wider mb-1 font-medium font-space-grotesk">Bounty Pool</div>
-              <div className="text-white text-2xl font-bold tracking-tight font-space-grotesk">
-                <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                  {campaign.bountyPool.toLocaleString()}
-                </span>
-                <span className="text-gray-400 text-base ml-2 font-medium">{campaign.tokenSymbol}</span>
-              </div>
-            </div>
-
-            {/* Progress */}
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-500 text-xs uppercase tracking-wider font-medium font-space-grotesk">Progress</span>
-                <span className="text-white text-sm font-semibold font-space-grotesk">
-                  {campaign.submissionsCount} / {campaign.totalSubmissions} submissions
-                </span>
-              </div>
-              <div 
-                className="w-full bg-gray-700/50 rounded-full h-2 mb-2 hover:bg-gray-600/50 transition-colors cursor-help" 
-                title={`${campaign.submissionsCount} / ${campaign.totalSubmissions} submissions (${campaign.completionPercentage}%)`}
-              >
-                <div 
-                  className="bg-gradient-to-r from-cyan-400 to-cyan-300 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${campaign.completionPercentage}%` }}
-                ></div>
-              </div>
-              <div className="text-gray-400 text-xs text-right font-space-grotesk">
-                {campaign.completionPercentage}% complete
-              </div>
-            </div>
-
-            {/* Hover Effect */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-2xl"></div>
-          </BackgroundCard>
+            campaign={campaign}
+            className={className}
+            onCampaignClick={handleCampaignClick}
+            getStatusBadgeStyle={getStatusBadgeStyle}
+            variant="grid"
+          />
         ))}
       </div>
     );
   }
 
-  // Single campaign layout (admin style)
-  const campaign = displayCampaigns[0];
+  // Single campaign layout (admin style) - stacked vertically
   return (
-    <div className={`flex-1 ${wrapperClassName}`}>
-      <BackgroundCard
-        variant="hover"
-        onClick={() => handleCampaignClick(campaign.id)}
-        className={`p-8 ${className}`}
-      >
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <div className="flex items-center space-x-3 mb-2">
-              <h2 className="text-xl font-semibold tracking-tight text-white font-space-grotesk">{campaign.title}</h2>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium font-space-grotesk ${getStatusBadgeStyle(campaign.status)}`}>
-                {campaign.status}
-              </span>
-            </div>
-            <p className="text-gray-400 font-space-grotesk">{campaign.description}</p>
-          </div>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-            <path d="m9 18 6-6-6-6"></path>
-          </svg>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span className="text-gray-400 font-space-grotesk">Progress</span>
-              <span 
-                className="font-medium text-white font-space-grotesk cursor-help" 
-                title={`${campaign.submissionsCount} / ${campaign.totalSubmissions} submissions (${campaign.completionPercentage}%)`}
-              >
-                {campaign.submissionsCount} / {campaign.totalSubmissions} submissions
-              </span>
-            </div>
-            <div 
-              className="w-full bg-gray-700/50 rounded-full h-2 hover:bg-gray-600/50 transition-colors cursor-help" 
-              title={`${campaign.submissionsCount} / ${campaign.totalSubmissions} submissions (${campaign.completionPercentage}%)`}
-            >
-              <div 
-                className="bg-gradient-to-r from-cyan-400 to-cyan-300 h-2 rounded-full transition-all duration-500" 
-                style={{ width: `${campaign.completionPercentage}%` }}
-              ></div>
-            </div>
-          </div>
-          <div className="flex items-center space-x-8 text-sm">
-            <div>
-              <p className="text-2xl text-white font-space-grotesk font-semibold">{campaign.bountyPool.toLocaleString()}</p>
-              <p className="text-gray-400 font-space-grotesk">{campaign.tokenSymbol} pool</p>
-            </div>
-            <div className="w-px h-8 bg-gray-600"></div>
-            <div>
-              <p className="text-2xl text-white font-space-grotesk font-semibold">{campaign.submissionsCount * 2}</p>
-              <p className="text-gray-400 font-space-grotesk">submissions</p>
-            </div>
-          </div>
-        </div>
-      </BackgroundCard>
+    <div className={`flex-1 space-y-6 ${wrapperClassName}`}>
+      {displayCampaigns.map((campaign) => (
+        <CampaignWithSubmissions
+          key={campaign.id}
+          campaign={campaign}
+          className={className}
+          onCampaignClick={handleCampaignClick}
+          getStatusBadgeStyle={getStatusBadgeStyle}
+          variant="single"
+        />
+      ))}
     </div>
   );
 };

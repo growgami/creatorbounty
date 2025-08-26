@@ -1,7 +1,7 @@
 import React from 'react';
-import { TabKey } from '../../types/types';
-import EmptyState from '../../../../components/ui/EmptyState';
-import CreatorEmptyState from '../bounty-specific/CreatorEmptyState';
+import { TabKey } from '@/features/bounty/creators/types/types';
+import EmptyState from '@/components/shared/ui/EmptyState';
+import CreatorEmptyState from '@/features/bounty/creators/components/states/CreatorEmptyState';
 
 interface TabContentProps {
   activeTab: TabKey;

@@ -3,7 +3,7 @@
 import React from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import BountyOverview from '@/features/bounty/creators/components/bounty-specific/BountyOverview';
+import BountyOverview from '@/features/bounty/creators/components/bounty-details/BountyOverview';
 import UserMenu from '@/components/layouts/UserMenu';
 import AnimatedGridBackground from '@/components/shared/backgrounds/AnimatedGridBackground';
 import { BountyData } from '@/features/bounty/creators/types/types';
