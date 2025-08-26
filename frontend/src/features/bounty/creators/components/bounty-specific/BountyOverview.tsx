@@ -45,6 +45,10 @@ const BountyOverview: React.FC<BountyOverviewProps> = ({
     return 'Submit Your Entry';
   };
 
+  const isButtonDisabled = () => {
+    return hasActiveSubmission || latestSubmission?.status === 'claimed';
+  };
+
 
 
   return (
@@ -68,6 +72,7 @@ const BountyOverview: React.FC<BountyOverviewProps> = ({
               onClick={() => setIsModalOpen(true)}
               size="md"
               className="whitespace-nowrap"
+              disabled={isButtonDisabled()}
             >
               {getButtonText()}
             </AuraButton>

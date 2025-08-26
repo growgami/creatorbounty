@@ -3,7 +3,7 @@
 import React from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { FadeIn, SlideUp } from '@/components/effects/animations/FadeInTransition';
-import Stats from '@/features/bounty-creator/components/ui/Stats';
+import Stats from '@/features/bounty/creators/components/ui/Stats';
 import AnimatedGridBackground from '@/components/shared/backgrounds/AnimatedGridBackground';
 import BountiesClient from '@/features/bounty/creators/orchestrator/home/CreatorBounties';
 import Navbar from '@/components/layouts/Navbar';

@@ -8,6 +8,7 @@ interface AuraButtonProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'white';
+  disabled?: boolean;
 }
 
 const AuraButton: React.FC<AuraButtonProps> = ({ 
@@ -15,7 +16,8 @@ const AuraButton: React.FC<AuraButtonProps> = ({
   onClick, 
   className = '',
   size = 'md',
-  variant = 'default'
+  variant = 'default',
+  disabled = false
 }) => {
   const sizeClasses = {
     sm: 'h-10 px-4 text-sm',
@@ -29,11 +31,13 @@ const AuraButton: React.FC<AuraButtonProps> = ({
     <>
       <button
         id={buttonId}
-        onClick={onClick}
+        onClick={disabled ? undefined : onClick}
+        disabled={disabled}
         className={`
           inline-flex gap-2 rounded-full font-semibold text-[#0d0d0d] items-center 
-          bg-transparent border-none cursor-pointer relative transition-transform 
-          duration-300 ease-in-out transform scale-100 hover:scale-110 focus-visible:scale-110
+          bg-transparent border-none relative transition-transform 
+          duration-300 ease-in-out transform scale-100 
+          ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-101 focus-visible:scale-110'}
           ${sizeClasses[size]} ${className}
         `}
         style={{
@@ -124,7 +128,7 @@ const AuraButton: React.FC<AuraButtonProps> = ({
           z-index: 2;
         }
         
-        #${buttonId}:is(:hover, :focus-visible) {
+        #${buttonId}:is(:hover, :focus-visible):not(:disabled) {
           --active: 1;
         }
         
