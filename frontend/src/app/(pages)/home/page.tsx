@@ -1,5 +1,5 @@
 import React from 'react';
-import DefaultLanding from '@/features/landing-pages/default/orchestrator/DefaultLanding';
+import DefaultLanding from '@/features/rbac-landing/components/landing/DefaultLanding';
 
 export default function HomePage() {
   return (

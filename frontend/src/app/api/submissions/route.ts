@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import { Submission } from '@/models/Submissions';
-import { SubmissionFormData } from '@/features/bounty-creator/types/types';
+import { SubmissionFormData } from '@/features/bounty/creators/types/types';
 
-export async function GET() {
+export async function GET(request: Request) {
   let client;
   try {
+    // Parse query parameters
+    const { searchParams } = new URL(request.url);
+    const bountyId = searchParams.get('bountyId');
+
     // Import pg client dynamically to avoid server-side issues
     const { Client } = await import('pg');
     
@@ -19,16 +23,31 @@ export async function GET() {
 
     await client.connect();
 
-    // Query to fetch all submissions
-    const query = `
-      SELECT 
-        id, bounty_id, creator, creatorpfp, submitted_url, 
-        status, wallet_address, created_at, updated_at
-      FROM submissions
-      ORDER BY created_at DESC;
-    `;
+    // Query to fetch submissions (with optional bountyId filter)
+    let query: string;
+    let queryParams: (string | number)[] = [];
+    
+    if (bountyId) {
+      query = `
+        SELECT 
+          id, bounty_id, creator, creatorpfp, submitted_url, 
+          status, wallet_address, created_at, updated_at
+        FROM submissions
+        WHERE bounty_id = $1
+        ORDER BY created_at DESC;
+      `;
+      queryParams = [bountyId];
+    } else {
+      query = `
+        SELECT 
+          id, bounty_id, creator, creatorpfp, submitted_url, 
+          status, wallet_address, created_at, updated_at
+        FROM submissions
+        ORDER BY created_at DESC;
+      `;
+    }
 
-    const result = await client.query(query);
+    const result = await client.query(query, queryParams);
 
     // Transform database rows to match Submission model
     const submissions: Submission[] = result.rows.map(row => ({
@@ -140,6 +159,96 @@ export async function POST(request: Request) {
     console.error('Database error:', error);
     return NextResponse.json(
       { error: 'Failed to create submission' },
+      { status: 500 }
+    );
+  } finally {
+    // Ensure client is closed
+    if (client) {
+      try {
+        await client.end();
+      } catch (error) {
+        console.error('Error closing database connection:', error);
+      }
+    }
+  }
+}
+
+export async function PATCH(request: Request) {
+  let client;
+  try {
+    const body = await request.json();
+    const { id, status, wallet_address } = body;
+    
+    // Validate required fields
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Submission ID is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!status || !['pending', 'claimed', 'rejected'].includes(status)) {
+      return NextResponse.json(
+        { error: 'Valid status is required (pending, claimed, rejected)' },
+        { status: 400 }
+      );
+    }
+
+    // Import pg client dynamically to avoid server-side issues
+    const { Client } = await import('pg');
+    
+    // Create database client
+    client = new Client({
+      host: process.env.PSQL_HOST,
+      port: parseInt(process.env.PSQL_PORT || '5432'),
+      user: process.env.PSQL_USERNAME,
+      password: process.env.PSQL_PASSWORD,
+      database: process.env.PSQL_DATABASE,
+    });
+
+    await client.connect();
+
+    // Update submission in database
+    const updateQuery = `
+      UPDATE submissions 
+      SET status = $2, wallet_address = $3, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING 
+        id, bounty_id, creator, creatorpfp, submitted_url, 
+        status, wallet_address, created_at, updated_at;
+    `;
+
+    const values = [id, status, wallet_address || null];
+    const result = await client.query(updateQuery, values);
+
+    if (result.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'Submission not found' },
+        { status: 404 }
+      );
+    }
+
+    const row = result.rows[0];
+
+    // Transform database row to match Submission model
+    const updatedSubmission: Submission = {
+      id: row.id,
+      bountyId: row.bounty_id,
+      creator: row.creator,
+      creatorPfp: row.creatorpfp,
+      submitted_url: row.submitted_url,
+      status: row.status,
+      wallet_address: row.wallet_address || undefined,
+      createdAt: new Date(row.created_at).toISOString(),
+      updatedAt: new Date(row.updated_at).toISOString(),
+    };
+
+    return NextResponse.json({ submission: updatedSubmission }, { status: 200 });
+
+  } catch (error) {
+    console.error('Database error:', error);
+    return NextResponse.json(
+      { error: 'Failed to update submission' },
       { status: 500 }
     );
   } finally {

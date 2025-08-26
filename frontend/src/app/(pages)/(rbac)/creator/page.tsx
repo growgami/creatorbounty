@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Suspense } from 'react';
-import CreatorLanding from '@/features/landing-pages/authenticated/creator/orchestrator/CreatorLanding';
+import CreatorLanding from '@/features/bounty/creators/orchestrator/landing/CreatorLanding';
 
 /**
  * Creator RBAC Page

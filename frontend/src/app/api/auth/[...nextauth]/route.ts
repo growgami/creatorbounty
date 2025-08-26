@@ -3,7 +3,7 @@ import TwitterProvider from 'next-auth/providers/twitter';
 import { saveUserToDatabase } from '@/features/auth/services/authService';
 import type { User } from '@/models/Users';
 import { JWT as NextAuthJWT } from 'next-auth/jwt';
-import { determineUserRole } from '@/features/rbac/services/roleAssignmentService';
+import { determineUserRole } from '@/features/rbac-landing/services/roleAssignmentService';
 
 // Extend the NextAuth User type to include our custom fields
 interface TwitterProfile {

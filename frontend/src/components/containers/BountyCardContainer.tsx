@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import BackgroundCard from '@/components/ui/BackgroundCard';
+import BackgroundCard from '@/components/shared/ui/BackgroundCard';
 
 type CampaignStatus = 'active' | 'upcoming' | 'ended' | 'completed' | 'draft' | 'paused';
 

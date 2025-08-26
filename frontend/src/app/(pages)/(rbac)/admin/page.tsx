@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Suspense } from 'react';
-import AdminLanding from '@/features/landing-pages/authenticated/admin/orchestrator/AdminLanding';
+import AdminLanding from '@/features/bounty/admins/orchestrators/landing/AdminLanding';
 
 /**
  * Admin RBAC Page

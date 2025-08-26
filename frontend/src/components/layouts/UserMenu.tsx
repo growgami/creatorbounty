@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { LogOut, User, ChevronDown } from 'lucide-react';
-import { useRole } from '@/features/rbac/hooks/useRole';
+import { useRole } from '@/features/rbac-landing/hooks/useRole';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 interface UserMenuProps {
