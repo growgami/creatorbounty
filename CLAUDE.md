@@ -222,6 +222,18 @@ FORCE_HTTPS=false
 
 ## Critical Implementation Details
 
+**Bounty-Specific Data Isolation:**
+- ALL data fetching hooks MUST accept bountyId parameters when dealing with submissions
+- Example: `useSubmitEntry(bountyId)` and `useGetSubmissions(bountyId)` 
+- Without bounty filtering, user submissions appear across all bounties incorrectly
+- React Query cache keys MUST include bountyId: `['submissions', bountyId]`
+
+**Multi-Bounty Display Architecture:**
+- `BountyCardContainer.tsx` with `variant="single"` renders multiple bounty cards stacked vertically
+- Each `CampaignWithSubmissions` component independently fetches its own submission data
+- Admin pages show multiple bounty cards by mapping over bounties array, not just first bounty
+- Avoid duplicate API calls - let individual components handle their own data fetching
+
 **Orchestrator Pattern Usage:**
 - Orchestrators coordinate multiple features without implementing UI
 - Handle complex state flows and business logic
@@ -233,6 +245,11 @@ FORCE_HTTPS=false
 - Composite indexes for query optimization
 - Foreign key constraints with proper cascading
 - JSON fields for flexible data (requirements arrays)
+
+**API Route Patterns:**
+- `/api/submissions` accepts optional `?bountyId=` query parameter for filtering
+- ALL submission-related endpoints must handle bounty-specific operations
+- Submission status checks must filter by both userId AND bountyId to prevent cross-bounty interference
 
 **Security Considerations:**
 - JWT tokens validated on every API request

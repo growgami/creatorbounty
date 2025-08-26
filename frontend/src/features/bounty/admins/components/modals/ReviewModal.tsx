@@ -2,13 +2,13 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { X, ExternalLink, CheckCircle, Loader } from 'lucide-react';
+import { X, ExternalLink, CheckCircle, Loader, Check, AlertTriangle } from 'lucide-react';
 import { ModalDrop } from '@/components/effects/animations/FadeInTransition';
 import ConfettiAnimation from '../../../../../components/effects/animations/ConfettiAnimation';
-import ConfirmationModal from '@/features/bounty/admins/components/modals/ConfirmationModal';
 import EnhancedToast from '@/components/shared/notifications/Toast';
 import { usePayments } from '@/features/bounty/admins/hooks/usePayments';
 import { paymentApi } from '@/services/wsgi/actions/paymentApi';
+import TikTokEmbed from '../media/TikTokEmbed';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -20,6 +20,7 @@ interface ReviewModalProps {
     submitted: string;
     status?: string;
     txHash?: string;
+    url?: string;
   } | null;
   onConfirm?: (txHash?: string) => void;
   onReject?: () => void;
@@ -236,14 +237,25 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
         {!loading ? (
           <div className="flex h-[80vh]">
             {/* Video Section */}
-            <div className="w-2/5 bg-black flex items-center justify-center rounded-l-2xl">
-              <div className="text-white text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 opacity-70">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polygon points="10,8 16,12 10,16 10,8"></polygon>
-                </svg>
-                <p className="text-sm opacity-70 font-space-grotesk">TikTok Video Player</p>
-              </div>
+            <div className="w-2/5 bg-black rounded-l-2xl overflow-hidden">
+              {submission?.url ? (
+                <TikTokEmbed 
+                  url={submission.url}
+                  className="h-full"
+                  showExternalLink={false}
+                  width={400}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-white text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 opacity-70">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polygon points="10,8 16,12 10,16 10,8"></polygon>
+                    </svg>
+                    <p className="text-sm opacity-70 font-space-grotesk">No video available</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Content Section */}
@@ -290,9 +302,16 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                 </div>
 
                 <div>
-                  <a href="#" className="text-cyan-400 hover:text-cyan-300 text-sm font-medium font-space-grotesk flex items-center gap-1">
-                    View on TikTok <ExternalLink className="w-4 h-4" />
-                  </a>
+                  {submission?.url && (
+                    <a 
+                      href={submission.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-cyan-400 hover:text-cyan-300 text-sm font-medium font-space-grotesk flex items-center gap-1"
+                    >
+                      View on TikTok <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
                 </div>
               </div>
 
@@ -325,30 +344,89 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
           onComplete={() => setShowConfetti(false)} 
         />
         
-        {/* Confirmation Modal */}
-        <ConfirmationModal
-          isOpen={showConfirmation}
-          title="Confirm Payment"
-          message={`Are you sure you want to approve this submission and pay ${PAYMENT_AMOUNT} XPL to ${submission?.creator || 'this creator'}?`}
-          confirmText="Confirm & Pay"
-          cancelText="Cancel"
-          type="approve"
-          isLoading={loading}
-          onConfirm={handleConfirmAction}
-          onCancel={() => setShowConfirmation(false)}
-        />
+        {/* Approve Confirmation Overlay */}
+        {showConfirmation && (
+          <div className="absolute inset-0 z-[70] flex items-center justify-center p-4">
+            <div 
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setShowConfirmation(false)}
+            />
+            <div className="relative w-full max-w-md">
+              <div className="bg-[#101010] border border-white/10 rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3),_0_0_0_1px_rgba(255,255,255,0.05)]">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="flex-shrink-0">
+                    <Check className="w-6 h-6 text-green-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white font-space-grotesk">
+                    Confirm Payment
+                  </h3>
+                </div>
+                <p className="text-white/80 mb-6 leading-relaxed font-space-grotesk">
+                  Are you sure you want to approve this submission and pay {PAYMENT_AMOUNT} XPL to {submission?.creator || 'this creator'}?
+                </p>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setShowConfirmation(false)}
+                    disabled={loading}
+                    className="flex-1 border border-white/20 py-3 px-6 rounded-full font-medium hover:bg-white/5 transition-colors text-white font-space-grotesk"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmAction}
+                    disabled={loading}
+                    className="flex-1 bg-cyan-500 text-white py-3 px-6 rounded-full font-medium hover:bg-cyan-600 transition-colors font-space-grotesk"
+                  >
+                    {loading ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mx-auto"></div>
+                    ) : (
+                      <span>Confirm & Pay</span>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         
-        {/* Reject Confirmation Modal */}
-        <ConfirmationModal
-          isOpen={showRejectConfirmation}
-          title="Reject Submission"
-          message={`Are you sure you want to reject this submission from ${submission?.creator || 'this creator'}? This action cannot be undone.`}
-          confirmText="Reject Submission"
-          cancelText="Cancel"
-          type="reject"
-          onConfirm={handleRejectAction}
-          onCancel={handleRejectCancel}
-        />
+        {/* Reject Confirmation Overlay */}
+        {showRejectConfirmation && (
+          <div className="absolute inset-0 z-[70] flex items-center justify-center p-4">
+            <div 
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={handleRejectCancel}
+            />
+            <div className="relative w-full max-w-md">
+              <div className="bg-[#101010] border border-white/10 rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3),_0_0_0_1px_rgba(255,255,255,0.05)]">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="flex-shrink-0">
+                    <X className="w-6 h-6 text-red-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white font-space-grotesk">
+                    Reject Submission
+                  </h3>
+                </div>
+                <p className="text-white/80 mb-6 leading-relaxed font-space-grotesk">
+                  Are you sure you want to reject this submission from {submission?.creator || 'this creator'}? This action cannot be undone.
+                </p>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={handleRejectCancel}
+                    className="flex-1 border border-white/20 py-3 px-6 rounded-full font-medium hover:bg-white/5 transition-colors text-white font-space-grotesk"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleRejectAction}
+                    className="flex-1 border border-white/20 py-3 px-6 rounded-full font-medium hover:bg-white/5 transition-colors text-white font-space-grotesk"
+                  >
+                    Reject Submission
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Enhanced Toast for Error Messages */}
         <EnhancedToast

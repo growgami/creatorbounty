@@ -58,7 +58,7 @@ Feature modules for distinct app flows.
 ##### `/features/bounty-admin`
 - **components/**: Admin dashboard UI (modals, overlays, TikTok embed, toast, confetti, etc.)
   - `ConfettiAnimation.tsx`, `ToastNotification.tsx`, `WalletOverlay.tsx`, `TikTokEmbed.tsx`, `RejectionWorkflow.tsx`, etc.
-  - **modals/**: `ConfirmationModal.tsx`, `ReviewModal.tsx` for admin actions.
+  - **modals/**: `ReviewModal.tsx` for admin actions.
 - **containers/**: Orchestrator/parent components for admin flows.
 - **hooks/**: Custom hooks for admin logic.
 - **orchestrator/**: High-level orchestrator logic for admin features.
