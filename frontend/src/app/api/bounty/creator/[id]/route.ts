@@ -4,6 +4,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
+// Extend the session type to match our custom user structure
+interface ExtendedUser {
+  id: string;
+  username: string;
+  userPfp: string;
+  wallet_address?: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  bio?: string;
+  followers_count?: number;
+  following_count?: number;
+  tweet_count?: number;
+  role: 'admin' | 'creator';
+}
+
+interface ExtendedSession {
+  user: ExtendedUser;
+  expires: string;
+}
+
 interface CreatorBounty {
   id: string;
   title: string;
@@ -36,7 +57,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   let client;
   try {
     // Get session to identify the current user
-    const session = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as ExtendedSession | null;
     
     if (!session?.user?.username) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });

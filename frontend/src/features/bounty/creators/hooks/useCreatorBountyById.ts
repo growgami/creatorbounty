@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 interface CreatorBounty {
   id: string;
@@ -61,6 +62,8 @@ const fetchCreatorBountyById = async (bountyId: string): Promise<CreatorBountyDa
 };
 
 export const useCreatorBountyById = (bountyId: string): UseCreatorBountyByIdResponse => {
+  const { user } = useAuth();
+  
   const {
     data,
     isLoading,
@@ -68,9 +71,9 @@ export const useCreatorBountyById = (bountyId: string): UseCreatorBountyByIdResp
     error,
     refetch,
   } = useQuery({
-    queryKey: ['creator-bounty', bountyId],
+    queryKey: ['creator-bounty', bountyId, user?.username],
     queryFn: () => fetchCreatorBountyById(bountyId),
-    enabled: !!bountyId,
+    enabled: !!bountyId && !!user?.username,
     staleTime: 0,
     gcTime: 0,
     retry: 3,

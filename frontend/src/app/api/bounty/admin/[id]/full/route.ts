@@ -81,7 +81,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         s.id, s.bounty_id, s.creator, s.creatorpfp, s.submitted_url, 
         s.status, s.wallet_address, s.created_at, s.updated_at,
         u.name as creator_name,
-        u."userPfp" as creator_profile_image
+        u.userpfp as creator_profile_image
       FROM submissions s
       LEFT JOIN users u ON s.creator = u.username
       WHERE s.bounty_id = $1

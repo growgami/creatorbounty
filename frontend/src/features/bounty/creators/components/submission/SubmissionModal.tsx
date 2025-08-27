@@ -60,7 +60,7 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
   }, [isOpen, bountyId, creator, creatorPfp]);
 
   // Validate TikTok URL
-  const validateTikTokUrl = (url: string): ValidationResult => {
+  const validateTikTokUrl = (url: string, agreedToTerms?: boolean): ValidationResult => {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -74,7 +74,9 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
       }
     }
 
-    if (!formData.agreedToTerms) {
+    // Use passed parameter or fallback to formData
+    const isAgreed = agreedToTerms !== undefined ? agreedToTerms : formData.agreedToTerms;
+    if (!isAgreed) {
       errors.push('You must agree to the terms and conditions');
     }
 
@@ -100,8 +102,8 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
     const agreed = e.target.checked;
     setFormData(prev => ({ ...prev, agreedToTerms: agreed }));
     
-    // Re-validate
-    const validationResult = validateTikTokUrl(formData.tiktokUrl);
+    // Re-validate with the new checkbox value
+    const validationResult = validateTikTokUrl(formData.tiktokUrl, agreed);
     setValidation(validationResult);
   };
 

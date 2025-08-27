@@ -1,6 +1,6 @@
 import React from 'react';
 import { TrendingUp, Users, Shield } from 'lucide-react';
-import { useCreatorStats } from '../../hooks/useCreatorStats';
+import { useSubmissionStats } from '../../hooks/useSubmissionStats';
 import { SlideUp } from '@/components/effects/animations/FadeInTransition';
 
 interface StatsProps {
@@ -8,7 +8,7 @@ interface StatsProps {
 }
 
 export const Stats: React.FC<StatsProps> = ({ delay = 0.6 }) => {
-  const { platformStats, isLoading, isError, error } = useCreatorStats();
+  const { platformStats, isLoading, isError, error } = useSubmissionStats();
 
   if (isLoading) return <div>Loading stats...</div>;
   if (isError) return <div>Error loading stats: {error?.message}</div>;
@@ -35,7 +35,7 @@ export const Stats: React.FC<StatsProps> = ({ delay = 0.6 }) => {
             <div className="flex items-center justify-center w-12 h-12 bg-purple-500/20 rounded-full mx-auto mb-3">
               <Shield className="w-6 h-6 text-purple-400" />
             </div>
-            <div className="text-2xl font-bold text-white font-space-grotesk">{platformStats?.xplRewardsPaid || '0'}</div>
+            <div className="text-2xl font-bold text-white font-space-grotesk">{platformStats?.xplRewardsPaid || 0}</div>
             <div className="text-sm text-gray-400 font-space-grotesk">XPL Rewards Paid</div>
           </div>
         </div>
