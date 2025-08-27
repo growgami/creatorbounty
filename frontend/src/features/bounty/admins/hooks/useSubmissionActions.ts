@@ -25,6 +25,7 @@ export interface AdminSubmission {
   submitted: string;
   status: 'pending' | 'claimed' | 'rejected';
   txHash?: string;
+  url?: string;
 }
 
 export interface UseSubmissionReturn {

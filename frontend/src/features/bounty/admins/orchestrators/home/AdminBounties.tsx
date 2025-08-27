@@ -48,7 +48,8 @@ const mapSubmissionToAdminSubmission = (submission: Submission): AdminSubmission
   avatar: submission.creatorPfp || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face',
   submitted: formatRelativeTime(submission.createdAt),
   status: submission.status,
-  txHash: submission.wallet_address
+  txHash: submission.wallet_address,
+  url: submission.submitted_url
 });
 
 /**

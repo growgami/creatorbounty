@@ -2,13 +2,13 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { X, ExternalLink, CheckCircle, Loader, Check, AlertTriangle } from 'lucide-react';
+import { X, ExternalLink, CheckCircle, Loader, Check } from 'lucide-react';
 import { ModalDrop } from '@/components/effects/animations/FadeInTransition';
-import ConfettiAnimation from '../../../../../components/effects/animations/ConfettiAnimation';
+import ConfettiAnimation from '@/components/effects/animations/ConfettiAnimation';
 import EnhancedToast from '@/components/shared/notifications/Toast';
 import { usePayments } from '@/features/bounty/admins/hooks/payment/usePayments';
 import { paymentApi } from '@/services/wsgi/actions/paymentApi';
-import TikTokEmbed from '../media/TikTokEmbed';
+import TikTokEmbed from '@/features/bounty/admins/components/media/TikTokEmbed';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -315,20 +315,45 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                 </div>
               </div>
 
-              <div className="flex space-x-3 mt-8">
-                <button 
-                  onClick={handleConfirm}
-                  className="flex-1 bg-cyan-500 text-white py-3 px-6 rounded-full font-medium hover:bg-cyan-600 transition-colors font-space-grotesk"
-                >
-                  Confirm & Pay
-                </button>
-                <button 
-                  onClick={handleReject}
-                  className="flex-1 border border-white/20 py-3 px-6 rounded-full font-medium hover:bg-white/5 transition-colors text-white font-space-grotesk"
-                >
-                  Reject
-                </button>
-              </div>
+              {submission?.status === 'pending' && (
+                <div className="flex space-x-3 mt-8">
+                  <button 
+                    onClick={handleConfirm}
+                    className="flex-1 bg-cyan-500 text-white py-3 px-6 rounded-full font-medium hover:bg-cyan-600 transition-colors font-space-grotesk"
+                  >
+                    Confirm & Pay
+                  </button>
+                  <button 
+                    onClick={handleReject}
+                    className="flex-1 border border-white/20 py-3 px-6 rounded-full font-medium hover:bg-white/5 transition-colors text-white font-space-grotesk"
+                  >
+                    Reject
+                  </button>
+                </div>
+              )}
+              
+              {submission?.status === 'claimed' && (
+                <div className="mt-8 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    <span className="text-green-300 font-medium font-space-grotesk">Submission Approved</span>
+                  </div>
+                  {submission.txHash && (
+                    <p className="text-sm text-gray-400 mt-1 font-space-grotesk">
+                      Transaction: {submission.txHash.slice(0, 8)}...{submission.txHash.slice(-8)}
+                    </p>
+                  )}
+                </div>
+              )}
+              
+              {submission?.status === 'rejected' && (
+                <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <X className="w-5 h-5 text-red-400" />
+                    <span className="text-red-300 font-medium font-space-grotesk">Submission Rejected</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (

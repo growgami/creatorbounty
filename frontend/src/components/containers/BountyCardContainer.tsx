@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import BackgroundCard from '@/components/shared/ui/BackgroundCard';
-import { useGetSubmissions } from '@/features/bounty/admins/hooks/submissions-actions/useGetSubmissions';
+import { useGetSubmissions } from '@/features/bounty/admins/hooks/submissions-actions/useFetchSubmissions';
 
 type CampaignStatus = 'active' | 'upcoming' | 'ended' | 'completed' | 'draft' | 'paused';
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TikTokEmbed as ReactTikTokEmbed } from 'react-social-media-embed';
-import { ExternalLink, AlertCircle, Loader } from 'lucide-react';
+import { ExternalLink, AlertCircle } from 'lucide-react';
 
 interface TikTokEmbedProps {
   url: string;
@@ -19,24 +19,16 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({
   showExternalLink = true,
   width = 325
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-
-  // Handle embed load success
-  const handleEmbedLoad = () => {
-    setIsLoading(false);
-    setHasError(false);
-  };
 
   // Handle embed load error
   const handleEmbedError = () => {
-    setIsLoading(false);
     setHasError(true);
   };
 
   // Validate TikTok URL format
   const isValidTikTokUrl = (tiktokUrl: string): boolean => {
-    const tiktokRegex = /^https?:\/\/(www\.)?(tiktok\.com|vm\.tiktok\.com)/i;
+    const tiktokRegex = /^https?:\/\/(www\.)?tiktok\.com|^https?:\/\/vm\.tiktok\.com/i;
     return tiktokRegex.test(tiktokUrl);
   };
 
@@ -117,22 +109,11 @@ const TikTokEmbed: React.FC<TikTokEmbedProps> = ({
         </div>
       </div>
 
-      {/* Loading State */}
-      {isLoading && (
-        <div className="flex items-center justify-center h-64">
-          <div className="flex items-center space-x-3">
-            <Loader className="w-6 h-6 text-blue-400 animate-spin" />
-            <span className="text-gray-400">Loading TikTok video...</span>
-          </div>
-        </div>
-      )}
-
       {/* TikTok Embed */}
       <div className="flex justify-center p-4">
         <ReactTikTokEmbed
           url={url}
           width={width}
-          onLoad={handleEmbedLoad}
           onError={handleEmbedError}
         />
       </div>
