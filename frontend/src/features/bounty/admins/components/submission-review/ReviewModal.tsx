@@ -6,7 +6,7 @@ import { X, ExternalLink, CheckCircle, Loader, Check, AlertTriangle } from 'luci
 import { ModalDrop } from '@/components/effects/animations/FadeInTransition';
 import ConfettiAnimation from '../../../../../components/effects/animations/ConfettiAnimation';
 import EnhancedToast from '@/components/shared/notifications/Toast';
-import { usePayments } from '@/features/bounty/admins/hooks/usePayments';
+import { usePayments } from '@/features/bounty/admins/hooks/payment/usePayments';
 import { paymentApi } from '@/services/wsgi/actions/paymentApi';
 import TikTokEmbed from '../media/TikTokEmbed';
 
@@ -49,7 +49,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   const { sendNativePayment } = usePayments();
   
   // Payment amount constant
-  const PAYMENT_AMOUNT = 0.0000000000000000000000000000000000000000001;
+  const PAYMENT_AMOUNT = 0.000001;
 
   // Function to handle failed transactions with detailed error reporting
   const handlePaymentFailure = (error: unknown, context: string) => {

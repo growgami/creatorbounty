@@ -5,6 +5,7 @@ import ProgressBar from '../states/ProgressBar';
 import SubmissionModal from '@/features/bounty/creators/components/submission/SubmissionModal';
 import SubmissionStatus from './SubmissionStatus';
 import { useSubmitEntry } from '@/features/bounty/creators/hooks/useSubmitEntry';
+import { useFetchCreatorSubmissions } from '@/features/bounty/creators/hooks/useFetchCreatorSubmissions';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import AuraButton from '@/components/shared/ui/AuraButton';
 
@@ -24,7 +25,8 @@ const BountyOverview: React.FC<BountyOverviewProps> = ({
   className = ""
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { submitEntry, hasActiveSubmission, latestSubmission } = useSubmitEntry(bountyId);
+  const { submitEntry } = useSubmitEntry(bountyId);
+  const { hasActiveSubmission, latestSubmission } = useFetchCreatorSubmissions(bountyId);
   const { user } = useAuth();
   const defaultRequirements = [
     { id: '1', text: 'Include #PlasmaTestnet hashtag' },

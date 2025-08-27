@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import ReviewModal from '@/features/bounty/admins/components/modals/ReviewModal';
+import ReviewModal from '@/features/bounty/admins/components/submission-review/ReviewModal';
 import EnhancedToast from '@/components/shared/notifications/Toast';
 import AnimatedGridBackground from '@/components/shared/backgrounds/AnimatedGridBackground';
 import UserMenu from '@/components/layouts/UserMenu';

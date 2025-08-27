@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FadeIn, SlideUp } from '@/components/effects/animations/FadeInTransition';
-import AnalyticsWidget from '@/features/bounty/admins/components/dashboard/AnalyticsWidget';
+import AnalyticsWidget from '@/components/containers/AnalyticsWidget';
 import AnimatedGridBackground from '@/components/shared/backgrounds/AnimatedGridBackground';
 import Navbar from '@/components/layouts/Navbar';
 import CampaignCards from '@/components/containers/BountyCardContainer';
