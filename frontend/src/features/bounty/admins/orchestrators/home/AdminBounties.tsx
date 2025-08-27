@@ -14,8 +14,7 @@ import DeleteBountyButton from '@/features/bounty/admins/components/bounty-manag
 import { useSubmission, AdminSubmission } from '@/features/bounty/admins/hooks/useSubmissionActions';
 import { Bounty } from '@/models/Bounty';
 import { Submission } from '@/models/Submissions';
-import { useBountyById } from '@/features/bounty/admins/hooks/bounty-actions/useGetBountyById';
-import { useGetSubmissions } from '@/features/bounty/admins/hooks/submissions-actions/useGetSubmissions';
+import { useAdminBountyFull } from '@/features/bounty/admins/hooks/useAdminBountyFull';
 import { useTotalSubmissionCount } from '@/features/bounty/admins/utils/totalSubmissionCount';
 
 interface AdminBountiesProps {
@@ -81,19 +80,18 @@ const AdminBounties: React.FC<AdminBountiesProps> = ({
     hideToast,
   } = useSubmission();
   
-  // Fetch single bounty when bountyId is present
+  // Use optimized admin bounty full hook that fetches bounty + submissions with JOINs
   const { 
     bounty: singleBounty, 
+    submissions: apiSubmissions,
     isLoading: isLoadingSingleBounty,
     isError: isSingleBountyError,
-    error: singleBountyError
-  } = useBountyById(bountyId);
+    error: singleBountyError,
+    refetch: refetchSubmissions
+  } = useAdminBountyFull(bountyId || '');
   
   // Local state for selected submission
   const [selectedSubmission, setSelectedSubmission] = useState<AdminSubmission | null>(null);
-  
-  // Fetch submissions from API for the specific bounty
-  const { submissions: apiSubmissions, loading: loadingSubmissions, error: submissionsError, refetch: refetchSubmissions } = useGetSubmissions(bountyId);
   
   // Group submissions by status and convert to AdminSubmission format
   // API now filters by bountyId server-side, so no need for client-side filtering
@@ -116,7 +114,7 @@ const AdminBounties: React.FC<AdminBountiesProps> = ({
   
   // Use single bounty if available, otherwise find in bounties list
   const currentBounty = singleBounty || bounties.find((b: Bounty) => b.id === bountyId);
-  const isLoading = isLoadingBounties || isLoadingSingleBounty || loadingSubmissions;
+  const isLoading = isLoadingBounties || isLoadingSingleBounty;
   
   // Show loading state while bounties are being fetched
   if (isLoading) {
@@ -441,8 +439,8 @@ const AdminBounties: React.FC<AdminBountiesProps> = ({
             selectedSubmissions={selectedSubmissions}
             onToggleSelection={toggleSubmissionSelection}
             onOpenModal={openSubmissionModal}
-            loading={loadingSubmissions}
-            error={submissionsError || undefined}
+            loading={isLoadingSingleBounty}
+            error={singleBountyError?.message || undefined}
           />
         </div>
       </main>

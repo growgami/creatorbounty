@@ -1,5 +1,25 @@
 import { NextResponse } from 'next/server';
-import { Bounty } from '@/models/Bounty';
+
+interface CreatorBounty {
+  id: string;
+  title: string;
+  description: string;
+  bountyPool: number;
+  tokenSymbol: string;
+  endDate?: string;
+  requirements: string[];
+  submissionsCount: number;
+  totalSubmissions: number;
+  completionPercentage: number;
+}
+
+interface CreatorActiveBountiesResponse {
+  bounties: CreatorBounty[];
+  stats: {
+    totalActiveBounties: number;
+    totalRewardPool: number;
+  };
+}
 
 export async function GET() {
   let client;
@@ -18,12 +38,12 @@ export async function GET() {
 
     await client.connect();
 
-    // Query to fetch all bounties with real-time submission counts
+    // Query to fetch only active bounties with creator-relevant data
+    // Excludes admin-only fields like createdBy, createdAt, updatedAt
     const query = `
       SELECT 
-        b.id, b.title, b.description, b.bounty_pool, b.token_symbol, b.status,
-        b.created_at, b.updated_at, b.end_date, b.created_by, b.requirements,
-        b.total_submissions,
+        b.id, b.title, b.description, b.bounty_pool, b.token_symbol, 
+        b.end_date, b.requirements, b.total_submissions,
         COALESCE(s.submission_count, 0) as submissions_count,
         CASE 
           WHEN b.total_submissions > 0 THEN 
@@ -36,36 +56,52 @@ export async function GET() {
         FROM submissions 
         GROUP BY bounty_id
       ) s ON b.id = s.bounty_id
+      WHERE b.status = 'active'
       ORDER BY b.created_at DESC;
     `;
 
     const result = await client.query(query);
 
-    // Transform database rows to match Bounty model
-    const bounties: Bounty[] = result.rows.map(row => ({
+    // Transform database rows to match CreatorBounty model
+    const bounties: CreatorBounty[] = result.rows.map(row => ({
       id: row.id,
       title: row.title,
       description: row.description,
       bountyPool: parseFloat(row.bounty_pool) || 0,
       tokenSymbol: row.token_symbol,
-      status: row.status,
-      createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
-      updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
       endDate: row.end_date ? new Date(row.end_date).toISOString() : undefined,
-      createdBy: row.created_by || 'unknown',
       requirements: row.requirements ? JSON.parse(row.requirements) : [],
       submissionsCount: parseInt(row.submissions_count) || 0,
       totalSubmissions: parseInt(row.total_submissions) || 0,
       completionPercentage: parseFloat(row.completion_percentage) || 0,
     }));
 
-    return NextResponse.json({ bounties }, { status: 200 });
+    // Calculate creator-relevant statistics
+    const stats = {
+      totalActiveBounties: bounties.length,
+      totalRewardPool: bounties.reduce((sum, bounty) => sum + bounty.bountyPool, 0),
+    };
+
+    const response: CreatorActiveBountiesResponse = {
+      bounties,
+      stats
+    };
+
+    return NextResponse.json(response, { status: 200 });
 
   } catch (error) {
     console.error('Database error:', error);
     
-    // Return empty array instead of error to prevent frontend issues
-    return NextResponse.json({ bounties: [] }, { status: 200 });
+    // Return empty response instead of error to prevent frontend issues
+    const emptyResponse: CreatorActiveBountiesResponse = {
+      bounties: [],
+      stats: {
+        totalActiveBounties: 0,
+        totalRewardPool: 0,
+      }
+    };
+    
+    return NextResponse.json(emptyResponse, { status: 200 });
   } finally {
     // Ensure client is closed
     if (client) {

@@ -8,7 +8,7 @@ import AnimatedGridBackground from '@/components/shared/backgrounds/AnimatedGrid
 import Navbar from '@/components/layouts/Navbar';
 import CampaignCards from '@/components/containers/BountyCardContainer';
 import AdminBounties from '@/features/bounty/admins/orchestrators/home/AdminBounties';
-import { useBounties } from '@/features/bounty/admins/hooks/bounty-actions/useGetBounties';
+import { useAdminDashboard } from '@/features/bounty/admins/hooks/useAdminDashboard';
 import AuraButton from '@/components/shared/ui/AuraButton';
 import BountyForm from '@/features/bounty/admins/components/forms/BountyFormModal';
 import EnhancedToast from '@/components/shared/notifications/Toast';
@@ -30,8 +30,8 @@ const LandingPage: React.FC<LandingPageProps> = ({
     message: ''
   });
   
-  // Use the bounties hook for fetching admin bounties
-  const { bounties, isLoading, isError, error, refetch } = useBounties();
+  // Use the optimized admin dashboard hook for fetching bounties with submission stats
+  const { bounties, summary, isLoading, isError, error, refetch } = useAdminDashboard();
   
   
   // If bounty query param exists, show the bounty orchestrator
@@ -94,12 +94,13 @@ const LandingPage: React.FC<LandingPageProps> = ({
     );
   }
 
-  // Map bounties to campaigns with default values (actual counts will be fetched by each card)
+  // Map bounties to campaigns - now with real submission counts from the JOIN query
   const campaigns = bounties.map(bounty => ({
     ...bounty,
-    status: bounty.status || 'active', // Default to 'active' if status is undefined
-    submissionsCount: 0, // This will be calculated by CampaignWithSubmissions component
-    completionPercentage: 0 // This will be calculated by CampaignWithSubmissions component
+    status: bounty.status || 'active',
+    // Submission counts are now provided by the optimized dashboard API with JOINs
+    submissionsCount: bounty.submissionsCount,
+    completionPercentage: bounty.completionPercentage
   }));
 
   return (

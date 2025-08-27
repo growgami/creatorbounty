@@ -8,7 +8,7 @@ import AnimatedGridBackground from '@/components/shared/backgrounds/AnimatedGrid
 import BountiesClient from '@/features/bounty/creators/orchestrator/home/CreatorBounties';
 import Navbar from '@/components/layouts/Navbar';
 import CampaignCards from '@/components/containers/BountyCardContainer';
-import { useBounties } from '@/features/bounty/admins/hooks/bounty-actions/useGetBounties';
+import { useCreatorBounties } from '@/features/bounty/creators/hooks/useCreatorBounties';
 import type { Bounty } from '@/models/Bounty';
 
 // Campaign type from BountyCardContainer
@@ -56,7 +56,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
       router.push('/creator');
     }
   };
-  const { bounties, isLoading, isError, error } = useBounties();
+  const { bounties, isLoading, isError, error } = useCreatorBounties();
   
   // If bounty query param exists, show the bounty orchestrator
   if (bounty) {

@@ -7,7 +7,7 @@ import BountyOverview from '@/features/bounty/creators/components/bounty-details
 import UserMenu from '@/components/layouts/UserMenu';
 import AnimatedGridBackground from '@/components/shared/backgrounds/AnimatedGridBackground';
 import { BountyData } from '@/features/bounty/creators/types/types';
-import { useBountyById } from '@/features/bounty/admins/hooks/bounty-actions/useGetBountyById';
+import { useCreatorBountyById } from '@/features/bounty/creators/hooks/useCreatorBountyById';
 
 
 interface BountiesClientProps {
@@ -23,8 +23,8 @@ const BountiesClient: React.FC<BountiesClientProps> = ({ className = '' }) => {
   const router = useRouter();
   const bountyId = searchParams.get('bounty');
 
-  // Fetch actual bounty data
-  const { bounty: fetchedBounty, isLoading, isError, error } = useBountyById(bountyId);
+  // Fetch actual bounty data with creator-specific optimizations
+  const { bounty: fetchedBounty, userSubmission, canSubmit, isLoading, isError, error } = useCreatorBountyById(bountyId || '');
 
   // Show loading state
   if (isLoading) {
@@ -79,7 +79,7 @@ const BountiesClient: React.FC<BountiesClientProps> = ({ className = '' }) => {
     title: fetchedBounty.title,
     reward: `${fetchedBounty.bountyPool.toLocaleString()} ${fetchedBounty.tokenSymbol}`,
     description: fetchedBounty.description,
-    status: mapBountyStatus(fetchedBounty.status),
+    status: 'active', // Creator API only returns active bounties
     endDate: fetchedBounty.endDate ? `Ends ${new Date(fetchedBounty.endDate).toLocaleDateString()}` : 'No end date'
   } : {
     title: 'Plasma Testnet Campaign',
