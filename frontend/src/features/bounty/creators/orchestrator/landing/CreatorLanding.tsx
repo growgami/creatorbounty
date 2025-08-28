@@ -9,7 +9,21 @@ import BountiesClient from '@/features/bounty/creators/orchestrator/home/Creator
 import Navbar from '@/components/layouts/Navbar';
 import CampaignCards from '@/components/containers/BountyCardContainer';
 import { useCreatorBounties } from '@/features/bounty/creators/hooks/useCreatorBounties';
-import type { Bounty } from '@/models/Bounty';
+
+// CreatorBounty type from the API response
+interface CreatorBounty {
+  id: string;
+  title: string;
+  description: string;
+  bountyPool: number;
+  tokenSymbol: string;
+  status: string;
+  endDate?: string;
+  requirements: string[];
+  submissionsCount: number;
+  totalSubmissions: number;
+  completionPercentage: number;
+}
 
 // Campaign type from BountyCardContainer
 type CampaignStatus = 'active' | 'upcoming' | 'ended' | 'completed' | 'draft' | 'paused';
@@ -26,8 +40,8 @@ interface Campaign {
   completionPercentage: number;
 }
 
-// Transform Bounty to Campaign
-const transformToCampaign = (bounty: Bounty): Campaign => ({
+// Transform CreatorBounty to Campaign
+const transformToCampaign = (bounty: CreatorBounty): Campaign => ({
   id: bounty.id,
   title: bounty.title,
   description: bounty.description,

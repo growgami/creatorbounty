@@ -1,4 +1,5 @@
 import { useFetchCreatorSubmissions } from './useFetchCreatorSubmissions';
+import { SubmissionWithRelationships } from '@/models/Relationships';
 
 interface SubmissionStatsData {
   activeCampaigns: number;
@@ -13,7 +14,7 @@ interface UseSubmissionStatsResponse {
   error: Error | null;
 }
 
-const calculatePlatformStats = (submissions: any[]): SubmissionStatsData => {
+const calculatePlatformStats = (submissions: SubmissionWithRelationships[]): SubmissionStatsData => {
   // Count unique bounty IDs to get active campaigns
   const uniqueBountyIds = new Set(submissions.map(sub => sub.bountyId));
   const activeCampaigns = uniqueBountyIds.size;

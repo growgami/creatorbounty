@@ -4,7 +4,6 @@ import { Submission } from '@/models/Submissions';
 
 interface SubmissionWithUser extends Submission {
   creatorName?: string;
-  creatorPfp?: string;
 }
 
 interface AdminBountyFullData {

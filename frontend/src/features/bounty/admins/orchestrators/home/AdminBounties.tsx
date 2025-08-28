@@ -15,6 +15,11 @@ import { useSubmission, AdminSubmission } from '@/features/bounty/admins/hooks/u
 import { Bounty } from '@/models/Bounty';
 import { Submission } from '@/models/Submissions';
 import { useAdminBountyFull } from '@/features/bounty/admins/hooks/useAdminBountyFull';
+
+// SubmissionWithUser type that matches the API response
+interface SubmissionWithUser extends Submission {
+  creatorName?: string;
+}
 import { useTotalSubmissionCount } from '@/features/bounty/admins/utils/totalSubmissionCount';
 
 interface AdminBountiesProps {
@@ -41,8 +46,8 @@ const formatRelativeTime = (dateString: string): string => {
   }
 };
 
-// Helper function to convert Submission to AdminSubmission
-const mapSubmissionToAdminSubmission = (submission: Submission): AdminSubmission => ({
+// Helper function to convert SubmissionWithUser to AdminSubmission
+const mapSubmissionToAdminSubmission = (submission: SubmissionWithUser): AdminSubmission => ({
   id: submission.id,
   creator: submission.creator,
   avatar: submission.creatorPfp || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face',

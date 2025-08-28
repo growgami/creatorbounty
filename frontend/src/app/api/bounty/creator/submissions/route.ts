@@ -2,6 +2,26 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
+// Extended session type to match our auth configuration
+interface ExtendedUser {
+  id: string;
+  username: string;
+  userPfp: string;
+  name?: string;
+  email?: string;
+  wallet_address?: string;
+  bio?: string;
+  followers_count?: number;
+  following_count?: number;
+  tweet_count?: number;
+  role?: 'admin' | 'creator';
+}
+
+interface ExtendedSession {
+  user: ExtendedUser;
+  expires: string;
+}
+
 interface CreatorSubmission {
   id: string;
   bountyId: string;
@@ -30,7 +50,7 @@ export async function GET(request: Request) {
   let client;
   try {
     // Get session to identify the current user
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions) as ExtendedSession | null;
     
     if (!session?.user?.username) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
@@ -56,7 +76,7 @@ export async function GET(request: Request) {
 
     // Query to fetch user's submissions with bounty details via JOIN
     let query: string;
-    let queryParams: (string)[] = [session.user.username];
+    const queryParams: (string)[] = [session.user.username];
     
     if (bountyId) {
       query = `

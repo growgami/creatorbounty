@@ -24,7 +24,7 @@ const BountiesClient: React.FC<BountiesClientProps> = ({ className = '' }) => {
   const bountyId = searchParams.get('bounty');
 
   // Fetch actual bounty data with creator-specific optimizations
-  const { bounty: fetchedBounty, userSubmission, canSubmit, isLoading, isError, error } = useCreatorBountyById(bountyId || '');
+  const { bounty: fetchedBounty, isLoading, isError, error } = useCreatorBountyById(bountyId || '');
 
   // Show loading state
   if (isLoading) {
@@ -57,22 +57,6 @@ const BountiesClient: React.FC<BountiesClientProps> = ({ className = '' }) => {
       </div>
     );
   }
-
-  // Map BountyStatus to BountyData status
-  const mapBountyStatus = (status: string | undefined): 'active' | 'ended' | 'pending' | undefined => {
-    switch (status) {
-      case 'active':
-      case 'paused':
-      case 'completed':
-        return 'active';
-      case 'ended':
-        return 'ended';
-      case 'draft':
-        return 'pending';
-      default:
-        return 'active';
-    }
-  };
 
   // Use fetched bounty data or fallback to mock data
   const bountyData: BountyData = fetchedBounty ? {

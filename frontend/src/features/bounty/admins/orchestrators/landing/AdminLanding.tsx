@@ -31,7 +31,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
   });
   
   // Use the optimized admin dashboard hook for fetching bounties with submission stats
-  const { bounties, summary, isLoading, isError, error, refetch } = useAdminDashboard();
+  const { bounties, isLoading, isError, error, refetch } = useAdminDashboard();
   
   
   // If bounty query param exists, show the bounty orchestrator

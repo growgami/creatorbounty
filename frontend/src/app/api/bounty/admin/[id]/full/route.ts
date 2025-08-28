@@ -6,7 +6,6 @@ import { Submission } from '@/models/Submissions';
 
 interface SubmissionWithUser extends Submission {
   creatorName?: string;
-  creatorPfp?: string;
 }
 
 interface AdminBountyFullResponse {
@@ -95,14 +94,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       id: row.id,
       bountyId: row.bounty_id,
       creator: row.creator,
-      creatorPfp: row.creatorpfp,
+      creatorPfp: row.creator_profile_image || row.creatorpfp || '',
       submitted_url: row.submitted_url,
       status: row.status,
       wallet_address: row.wallet_address || undefined,
       createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
       updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
       creatorName: row.creator_name || undefined,
-      creatorPfp: row.creator_profile_image || row.creatorpfp || undefined,
     }));
 
     // Calculate submission summary

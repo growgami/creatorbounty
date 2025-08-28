@@ -2,6 +2,26 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
+// Extended session type to match our auth configuration
+interface ExtendedUser {
+  id: string;
+  username: string;
+  userPfp: string;
+  name?: string;
+  email?: string;
+  wallet_address?: string;
+  bio?: string;
+  followers_count?: number;
+  following_count?: number;
+  tweet_count?: number;
+  role?: 'admin' | 'creator';
+}
+
+interface ExtendedSession {
+  user: ExtendedUser;
+  expires: string;
+}
+
 interface CreatorStatsResponse {
   platform: {
     activeCampaigns: number;
@@ -23,7 +43,7 @@ export async function GET() {
   let client;
   try {
     // Get session to identify the current user (optional for platform stats)
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions) as ExtendedSession | null;
 
     // Import pg client dynamically to avoid server-side issues
     const { Client } = await import('pg');
