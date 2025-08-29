@@ -44,7 +44,7 @@ interface UserSubmission {
   status: 'pending' | 'claimed' | 'rejected';
   createdAt: string;
   updatedAt: string;
-  wallet_address?: string;
+  tx_hash?: string;
 }
 
 interface CreatorBountyResponse {
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Query to check if the current user has already submitted to this bounty
     const userSubmissionQuery = `
       SELECT 
-        id, submitted_url, status, created_at, updated_at, wallet_address
+        id, submitted_url, status, created_at, updated_at, tx_hash
       FROM submissions
       WHERE bounty_id = $1 AND creator = $2
       ORDER BY created_at DESC
@@ -142,7 +142,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         status: submissionRow.status,
         createdAt: new Date(submissionRow.created_at).toISOString(),
         updatedAt: new Date(submissionRow.updated_at).toISOString(),
-        wallet_address: submissionRow.wallet_address || undefined,
+        tx_hash: submissionRow.tx_hash || undefined,
       };
     }
 

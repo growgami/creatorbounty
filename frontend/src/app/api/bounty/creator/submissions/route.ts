@@ -30,7 +30,7 @@ interface CreatorSubmission {
   status: 'pending' | 'claimed' | 'rejected';
   createdAt: string;
   updatedAt: string;
-  wallet_address?: string;
+  tx_hash?: string;
   bountyReward: number;
   tokenSymbol: string;
 }
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
     if (bountyId) {
       query = `
         SELECT 
-          s.id, s.bounty_id, s.submitted_url, s.status, s.wallet_address,
+          s.id, s.bounty_id, s.submitted_url, s.status, s.tx_hash,
           s.created_at, s.updated_at,
           b.title as bounty_title,
           b.bounty_pool as bounty_reward,
@@ -95,7 +95,7 @@ export async function GET(request: Request) {
     } else {
       query = `
         SELECT 
-          s.id, s.bounty_id, s.submitted_url, s.status, s.wallet_address,
+          s.id, s.bounty_id, s.submitted_url, s.status, s.tx_hash,
           s.created_at, s.updated_at,
           b.title as bounty_title,
           b.bounty_pool as bounty_reward,
@@ -118,7 +118,7 @@ export async function GET(request: Request) {
       status: row.status,
       createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
       updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
-      wallet_address: row.wallet_address || undefined,
+      tx_hash: row.tx_hash || undefined,
       bountyReward: parseFloat(row.bounty_reward) || 0,
       tokenSymbol: row.token_symbol,
     }));

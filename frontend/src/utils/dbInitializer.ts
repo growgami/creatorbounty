@@ -103,14 +103,6 @@ export const ensureTableColumns = async () => {
     if (submissionsTableExists.rows[0].exists) {
       console.log('Submissions table exists, checking columns...');
       
-      // Check if old wallet_address column exists (needs to be renamed to tx_hash)
-      const walletAddressExists = await client.query(
-        `SELECT EXISTS (
-          SELECT FROM information_schema.columns 
-          WHERE table_name = 'submissions' AND column_name = 'wallet_address'
-        );`
-      );
-      
       // Check if new tx_hash column exists
       const txHashExists = await client.query(
         `SELECT EXISTS (
@@ -119,20 +111,8 @@ export const ensureTableColumns = async () => {
         );`
       );
       
-      if (walletAddressExists.rows[0].exists && !txHashExists.rows[0].exists) {
-        console.log('Renaming wallet_address column to tx_hash in submissions table...');
-        await client.query(`
-          ALTER TABLE submissions 
-          RENAME COLUMN wallet_address TO tx_hash;
-        `);
-        console.log('Column renamed successfully: wallet_address -> tx_hash');
-      } else if (walletAddressExists.rows[0].exists && txHashExists.rows[0].exists) {
-        // Both columns exist, drop the old one
-        console.log('Both wallet_address and tx_hash exist, dropping wallet_address...');
-        await client.query(`ALTER TABLE submissions DROP COLUMN wallet_address;`);
-        console.log('Old wallet_address column dropped successfully');
-      } else if (!txHashExists.rows[0].exists) {
-        // Neither column exists, add tx_hash
+      if (!txHashExists.rows[0].exists) {
+        // tx_hash column doesn't exist, add it
         console.log('Adding tx_hash column to submissions table...');
         await client.query(`
           ALTER TABLE submissions 
@@ -140,7 +120,21 @@ export const ensureTableColumns = async () => {
         `);
         console.log('tx_hash column added successfully');
       } else {
-        console.log('Submissions table columns are up to date');
+        console.log('tx_hash column already exists');
+      }
+
+      // Ensure any old wallet_address column is removed if it exists
+      const walletAddressExists = await client.query(
+        `SELECT EXISTS (
+          SELECT FROM information_schema.columns 
+          WHERE table_name = 'submissions' AND column_name = 'wallet_address'
+        );`
+      );
+      
+      if (walletAddressExists.rows[0].exists) {
+        console.log('Removing deprecated wallet_address column from submissions table...');
+        await client.query(`ALTER TABLE submissions DROP COLUMN wallet_address;`);
+        console.log('Old wallet_address column dropped successfully');
       }
 
       // Check if creator_id column exists
