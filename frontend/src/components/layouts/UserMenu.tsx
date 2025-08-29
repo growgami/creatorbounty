@@ -59,14 +59,20 @@ const UserMenu: React.FC<UserMenuProps> = ({
         className="flex items-center space-x-2 hover:bg-white/5 rounded-lg px-2 py-1 transition-colors"
       >
         <div className="relative w-8 h-8">
-          <Image
-            src={user.userPfp}
-            alt={`${user.username} profile picture`}
-            width={32}
-            height={32}
-            className="rounded-full object-cover"
-            unoptimized
-          />
+          {user.userPfp ? (
+            <Image
+              src={user.userPfp}
+              alt={`${user.username} profile picture`}
+              width={32}
+              height={32}
+              className="rounded-full object-cover"
+              unoptimized
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+              <User className="w-4 h-4 text-gray-300" />
+            </div>
+          )}
         </div>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -78,14 +84,20 @@ const UserMenu: React.FC<UserMenuProps> = ({
           <div className="px-4 py-3 border-b border-white/10">
             <div className="flex items-center space-x-3">
               <div className="relative w-10 h-10">
-                <Image
-                  src={user.userPfp}
-                  alt={`${user.username} profile picture`}
-                  width={40}
-                  height={40}
-                  className="rounded-full object-cover"
-                  unoptimized
-                />
+                {user.userPfp ? (
+                  <Image
+                    src={user.userPfp}
+                    alt={`${user.username} profile picture`}
+                    width={40}
+                    height={40}
+                    className="rounded-full object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
+                    <User className="w-5 h-5 text-gray-300" />
+                  </div>
+                )}
               </div>
               <div>
                 <p className="text-sm text-white font-space-grotesk">

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { User, Edit3, Check, X, ExternalLink, Wallet } from 'lucide-react';
+import { User, Edit3, Check, X, ExternalLink, Wallet, ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useUserSubmissions } from '@/features/user-profile/hooks/useUserSubmissions';
 import { useWalletUpdate } from '@/features/user-profile/hooks/useWalletUpdate';
@@ -72,6 +73,7 @@ const UserProfile: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const { submissions, stats, loading: submissionsLoading, refetch } = useUserSubmissions();
   const { updateWalletAddress, loading: walletLoading } = useWalletUpdate();
+  const router = useRouter();
   
   const [isEditingWallet, setIsEditingWallet] = useState(false);
   const [walletAddress, setWalletAddress] = useState(user?.wallet_address || '');
@@ -114,12 +116,23 @@ const UserProfile: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white font-space-grotesk mb-2">
-            User Profile
-          </h1>
-          <p className="text-gray-400 font-space-grotesk">
-            Manage your profile and view your submission history
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white font-space-grotesk mb-2">
+                User Profile
+              </h1>
+              <p className="text-gray-400 font-space-grotesk">
+                Manage your profile and view your submission history
+              </p>
+            </div>
+            <button
+              onClick={() => router.push('/home')}
+              className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg px-4 py-2 text-gray-300 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="font-space-grotesk">Back to Home</span>
+            </button>
+          </div>
         </div>
 
         {/* Overview Section */}
