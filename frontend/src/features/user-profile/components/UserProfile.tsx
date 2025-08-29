@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Edit3, Check, X, ExternalLink, Wallet } from 'lucide-react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useUserSubmissions } from '@/features/user-profile/hooks/useUserSubmissions';
@@ -75,6 +75,13 @@ const UserProfile: React.FC = () => {
   
   const [isEditingWallet, setIsEditingWallet] = useState(false);
   const [walletAddress, setWalletAddress] = useState(user?.wallet_address || '');
+
+  // Sync local wallet address state with user data
+  useEffect(() => {
+    if (user?.wallet_address !== undefined) {
+      setWalletAddress(user.wallet_address || '');
+    }
+  }, [user?.wallet_address]);
 
   const handleWalletSave = async () => {
     if (!walletAddress.trim()) return;
@@ -198,8 +205,8 @@ const UserProfile: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className={`text-white font-space-grotesk ${!user?.wallet_address ? 'text-yellow-400 animate-pulse' : ''}`}>
-                {user?.wallet_address || 'Enter your wallet address'}
+              <div className={`text-white font-space-grotesk ${!walletAddress ? 'text-yellow-400 animate-pulse' : ''}`}>
+                {walletAddress || 'Enter your wallet address'}
               </div>
             )}
           </div>

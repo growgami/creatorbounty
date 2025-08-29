@@ -1,6 +1,6 @@
 import NextAuth, { User as NextAuthUser, Session as NextAuthSession } from 'next-auth';
 import TwitterProvider from 'next-auth/providers/twitter';
-import { saveUserToDatabase } from '@/features/auth/services/authService';
+import { saveUserToDatabase, getUserById } from '@/features/auth/services/authService';
 import type { User } from '@/models/Users';
 import { JWT as NextAuthJWT } from 'next-auth/jwt';
 import { determineUserRole } from '@/features/rbac-landing/services/roleAssignmentService';
@@ -13,12 +13,6 @@ interface TwitterProfile {
     username: string;
     email?: string;
     profile_image_url: string;
-    description?: string;
-    public_metrics?: {
-      followers_count: number;
-      following_count: number;
-      tweet_count: number;
-    };
   };
   // Index signature for additional properties
   [key: string]: string | number | object | undefined;
@@ -29,10 +23,6 @@ interface ExtendedUser extends NextAuthUser {
   username: string;
   userPfp: string;
   wallet_address?: string;
-  bio?: string;
-  followers_count?: number;
-  following_count?: number;
-  tweet_count?: number;
   role?: 'admin' | 'creator';
 }
 
@@ -58,10 +48,6 @@ const authOptions = {
           username: profile.data.username,
           email: profile.data.email || null,
           userPfp: profile.data.profile_image_url,
-          bio: profile.data.description || null,
-          followers_count: profile.data.public_metrics?.followers_count || 0,
-          following_count: profile.data.public_metrics?.following_count || 0,
-          tweet_count: profile.data.public_metrics?.tweet_count || 0,
         } as ExtendedUser;
       },
     }),
@@ -70,19 +56,44 @@ const authOptions = {
   callbacks: {
     async session({ session, token }: { session: NextAuthSession; token: NextAuthJWT }) {
       // Add user data to session
-      if (session.user) {
-        session.user = {
-          ...session.user,
-          id: token.id as string,
-          username: token.username as string,
-          userPfp: token.userPfp as string,
-          wallet_address: token.wallet_address as string,
-          bio: token.bio as string,
-          followers_count: token.followers_count as number,
-          following_count: token.following_count as number,
-          tweet_count: token.tweet_count as number,
-          role: token.role as 'admin' | 'creator',
-        } as ExtendedUser;
+      if (session.user && token.id) {
+        try {
+          // Fetch fresh user data from database to get updated wallet address
+          const freshUserData = await getUserById(token.id as string);
+          
+          if (freshUserData) {
+            session.user = {
+              ...session.user,
+              id: token.id as string,
+              username: freshUserData.username,
+              userPfp: freshUserData.userPfp,
+              wallet_address: freshUserData.wallet_address,
+              name: freshUserData.name,
+              role: freshUserData.role,
+            } as ExtendedUser;
+          } else {
+            // Fallback to token data if database fetch fails
+            session.user = {
+              ...session.user,
+              id: token.id as string,
+              username: token.username as string,
+              userPfp: token.userPfp as string,
+              wallet_address: token.wallet_address as string,
+              role: token.role as 'admin' | 'creator',
+            } as ExtendedUser;
+          }
+        } catch (error) {
+          console.error('Error fetching fresh user data in session callback:', error);
+          // Fallback to token data if database fetch fails
+          session.user = {
+            ...session.user,
+            id: token.id as string,
+            username: token.username as string,
+            userPfp: token.userPfp as string,
+            wallet_address: token.wallet_address as string,
+            role: token.role as 'admin' | 'creator',
+          } as ExtendedUser;
+        }
       }
       return session;
     },
@@ -94,10 +105,6 @@ const authOptions = {
         token.username = extendedUser.username;
         token.userPfp = extendedUser.userPfp;
         token.wallet_address = extendedUser.wallet_address;
-        token.bio = extendedUser.bio;
-        token.followers_count = extendedUser.followers_count;
-        token.following_count = extendedUser.following_count;
-        token.tweet_count = extendedUser.tweet_count;
         
         // Determine user role
         try {
@@ -110,12 +117,7 @@ const authOptions = {
             username: extendedUser.username,
             userPfp: extendedUser.userPfp,
             name: extendedUser.name || undefined,
-            email: extendedUser.email === null ? undefined : extendedUser.email,
             wallet_address: extendedUser.wallet_address,
-            bio: extendedUser.bio,
-            followers_count: extendedUser.followers_count,
-            following_count: extendedUser.following_count,
-            tweet_count: extendedUser.tweet_count,
             role: userRole,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),

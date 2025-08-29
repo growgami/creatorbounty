@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface UseWalletUpdateReturn {
   updateWalletAddress: (address: string) => Promise<boolean>;
@@ -12,6 +13,7 @@ interface UseWalletUpdateReturn {
 export const useWalletUpdate = (): UseWalletUpdateReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { update } = useSession();
 
   const updateWalletAddress = async (address: string): Promise<boolean> => {
     try {
@@ -29,6 +31,13 @@ export const useWalletUpdate = (): UseWalletUpdateReturn => {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to update wallet address');
+      }
+
+      // Update the session to reflect the new wallet address
+      if (update) {
+        await update({
+          wallet_address: address,
+        });
       }
 
       return true;

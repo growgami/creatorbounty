@@ -142,6 +142,57 @@ export const ensureTableColumns = async () => {
       } else {
         console.log('Submissions table columns are up to date');
       }
+
+      // Check if creator_id column exists
+      const creatorIdExists = await client.query(
+        `SELECT EXISTS (
+          SELECT FROM information_schema.columns 
+          WHERE table_name = 'submissions' AND column_name = 'creator_id'
+        );`
+      );
+      
+      if (!creatorIdExists.rows[0].exists) {
+        console.log('Adding creator_id column to submissions table...');
+        await client.query(`
+          ALTER TABLE submissions 
+          ADD COLUMN creator_id VARCHAR(36);
+        `);
+        
+        // Add foreign key constraint after adding the column
+        await client.query(`
+          ALTER TABLE submissions 
+          ADD CONSTRAINT fk_submissions_creator_id 
+          FOREIGN KEY (creator_id) REFERENCES users(id);
+        `);
+        
+        // Add index for creator_id
+        await client.query(`
+          CREATE INDEX IF NOT EXISTS idx_submissions_creator_id ON submissions(creator_id);
+        `);
+        
+        console.log('creator_id column added successfully with foreign key constraint');
+      } else {
+        console.log('creator_id column already exists');
+      }
+
+      // Check if payment_amount column exists
+      const paymentAmountExists = await client.query(
+        `SELECT EXISTS (
+          SELECT FROM information_schema.columns 
+          WHERE table_name = 'submissions' AND column_name = 'payment_amount'
+        );`
+      );
+      
+      if (!paymentAmountExists.rows[0].exists) {
+        console.log('Adding payment_amount column to submissions table...');
+        await client.query(`
+          ALTER TABLE submissions 
+          ADD COLUMN payment_amount DECIMAL(15,6);
+        `);
+        console.log('payment_amount column added successfully');
+      } else {
+        console.log('payment_amount column already exists');
+      }
     }
     
     await client.end();
