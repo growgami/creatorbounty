@@ -17,7 +17,7 @@ interface CreatorBounty {
   description: string;
   bountyPool: number;
   tokenSymbol: string;
-  status: string;
+  status?: string;
   endDate?: string;
   requirements: string[];
   submissionsCount: number;

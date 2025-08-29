@@ -10,6 +10,7 @@ export async function GET(request: Request) {
     const bountyId = searchParams.get('bountyId');
     const creator = searchParams.get('creator');
     const creatorId = searchParams.get('creatorId');
+    const submissionId = searchParams.get('submissionId');
 
     // Import pg client dynamically to avoid server-side issues
     const { Client } = await import('pg');
@@ -43,6 +44,11 @@ export async function GET(request: Request) {
     if (creatorId) {
       whereConditions.push('s.creator_id = $' + (queryParams.length + 1));
       queryParams.push(creatorId);
+    }
+    
+    if (submissionId) {
+      whereConditions.push('s.id = $' + (queryParams.length + 1));
+      queryParams.push(submissionId);
     }
     
     const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';

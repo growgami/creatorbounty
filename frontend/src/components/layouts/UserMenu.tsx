@@ -2,10 +2,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { LogOut, User, ChevronDown } from 'lucide-react';
 import { useRole } from '@/features/rbac-landing/hooks/useRole';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useNavigation } from '@/hooks/useNavigation';
 
 interface UserMenuProps {
   className?: string;
@@ -18,6 +19,8 @@ const UserMenu: React.FC<UserMenuProps> = ({
   const { user, logout } = useAuth();
   const { role, clearRole } = useRole();
   const router = useRouter();
+  const pathname = usePathname();
+  const { navigateToProfile } = useNavigation();
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -118,7 +121,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
             <button
               onClick={() => {
                 setIsOpen(false);
-                router.push('/profile');
+                navigateToProfile(pathname);
               }}
               className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center space-x-3 font-space-grotesk"
             >

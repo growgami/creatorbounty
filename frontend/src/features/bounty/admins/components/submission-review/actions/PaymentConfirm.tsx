@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Check, Loader } from 'lucide-react';
 import EnhancedToast from '@/components/shared/notifications/Toast';
 import ConfettiAnimation from '@/components/effects/animations/ConfettiAnimation';
-import { usePayments } from '@/features/bounty/admins/hooks/payment/usePushPayment';
+import { usePayments, type WalletValidationResult } from '@/features/bounty/admins/hooks/payment/usePushPayment';
 import { paymentApi } from '@/services/wsgi/actions/paymentApi';
 
 interface PaymentConfirmProps {
@@ -47,7 +47,13 @@ const PaymentConfirm: React.FC<PaymentConfirmProps> = ({
     message: ''
   });
   
-  const { sendNativePayment } = usePayments();
+  const { sendNativePayment, validateWallet, useWalletValidation } = usePayments();
+  
+  // Pre-validate wallet if we have submission info
+  const { data: walletValidation, isLoading: validationLoading, error: validationError } = useWalletValidation(
+    undefined, // userId (not available in current props)
+    submission?.id // submissionId
+  );
   
   // Use custom amount input by admin
   const PAYMENT_AMOUNT = parseFloat(customAmount) || 0;
@@ -139,22 +145,46 @@ const PaymentConfirm: React.FC<PaymentConfirmProps> = ({
 
   const handleConfirmAction = async () => {
     setLoading(true);
-    setLoadingText('Preparing transaction...');
+    setLoadingText('Validating wallet address...');
     
     try {
-      // Use the creator wallet address passed as prop
-      if (!creatorWalletAddress) {
-        handlePaymentFailure(new Error('Creator wallet address not found'), 'payment preparation');
+      // Validate wallet address before proceeding with payment
+      let validationResult: WalletValidationResult;
+      
+      if (walletValidation) {
+        // Use cached validation if available
+        validationResult = walletValidation;
+      } else {
+        // Perform fresh validation
+        validationResult = await validateWallet(undefined, submission?.id);
+      }
+      
+      if (!validationResult.isValid) {
+        handlePaymentFailure(
+          new Error(validationResult.error || 'User wallet validation failed'), 
+          'wallet validation'
+        );
         setLoading(false);
         return;
       }
       
-      const recipientAddress = creatorWalletAddress;
+      setLoadingText('Preparing transaction...');
       
-      // Send XPL tokens as bounty payment
+      // Use validated wallet address (takes precedence over prop)
+      const recipientAddress = validationResult.walletAddress || creatorWalletAddress;
+      
+      if (!recipientAddress) {
+        handlePaymentFailure(new Error('No valid wallet address found'), 'payment preparation');
+        setLoading(false);
+        return;
+      }
+      
+      // Send XPL tokens as bounty payment with validation
       const result = await sendNativePayment({
         recipient: recipientAddress,
-        amount: PAYMENT_AMOUNT
+        amount: PAYMENT_AMOUNT,
+        submissionId: submission?.id,
+        skipValidation: true // Skip validation since we already validated above
       });
       
       setLoadingText('Transaction sent... waiting for confirmation');
@@ -258,14 +288,43 @@ const PaymentConfirm: React.FC<PaymentConfirmProps> = ({
                     Confirm Payment
                   </h3>
                 </div>
-                <p className="text-white/80 mb-6 leading-relaxed font-space-grotesk">
+                <p className="text-white/80 mb-4 leading-relaxed font-space-grotesk">
                   Approve this submission and pay to <span className="font-semibold text-cyan-400">{submission?.creator || 'this creator'}</span>:
                 </p>
-                {creatorWalletAddress && (
-                  <p className="text-gray-400 text-sm mb-4 font-space-grotesk break-all">
-                    Recipient: {creatorWalletAddress}
-                  </p>
-                )}
+                
+                {/* Wallet validation status */}
+                <div className="mb-4 p-3 bg-black/20 border border-white/10 rounded-lg">
+                  {validationLoading && (
+                    <p className="text-sm text-yellow-400 font-space-grotesk flex items-center">
+                      <Loader className="w-4 h-4 mr-2 animate-spin" />
+                      Validating wallet address...
+                    </p>
+                  )}
+                  {validationError && (
+                    <p className="text-sm text-red-400 font-space-grotesk">
+                      ⚠️ Wallet validation failed
+                    </p>
+                  )}
+                  {walletValidation && !walletValidation.isValid && (
+                    <div className="text-sm text-red-400 font-space-grotesk">
+                      <p className="mb-1">⚠️ Payment not possible:</p>
+                      <p className="text-xs">{walletValidation.error}</p>
+                    </div>
+                  )}
+                  {walletValidation && walletValidation.isValid && (
+                    <div className="text-sm text-green-400 font-space-grotesk">
+                      <p className="mb-1">✓ Wallet verified</p>
+                      <p className="text-xs text-gray-400 break-all">
+                        {walletValidation.walletAddress}
+                      </p>
+                    </div>
+                  )}
+                  {!validationLoading && !walletValidation && creatorWalletAddress && (
+                    <p className="text-sm text-gray-400 font-space-grotesk break-all">
+                      Recipient: {creatorWalletAddress}
+                    </p>
+                  )}
+                </div>
                 
                 {/* Payment Amount Input */}
                 <div className="mb-6">
@@ -304,7 +363,12 @@ const PaymentConfirm: React.FC<PaymentConfirmProps> = ({
                   </button>
                   <button
                     onClick={handleConfirmAction}
-                    disabled={loading || parseFloat(customAmount) <= 0}
+                    disabled={
+                      loading || 
+                      parseFloat(customAmount) <= 0 || 
+                      validationLoading ||
+                      (walletValidation && !walletValidation.isValid)
+                    }
                     className="flex-1 bg-cyan-500 text-white py-4 px-6 rounded-full font-medium hover:bg-cyan-600 transition-colors font-space-grotesk disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="flex flex-col items-center">

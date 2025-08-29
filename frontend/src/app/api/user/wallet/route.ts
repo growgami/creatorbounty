@@ -73,7 +73,7 @@ export async function PUT(request: NextRequest) {
 
 /**
  * GET /api/user/wallet
- * Gets current user's wallet address
+ * Gets user's wallet address (current user or specified userId for admin)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -86,6 +86,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Check for userId query parameter (for admin validation)
+    const { searchParams } = new URL(request.url);
+    const queryUserId = searchParams.get('userId');
+    
+    // If userId is provided, verify the current user is admin
+    let targetUserId = (session.user as any).id;
+    if (queryUserId) {
+      // Only admin users can query other users' wallet addresses
+      if ((session.user as any).role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Admin access required to query other users' },
+          { status: 403 }
+        );
+      }
+      targetUserId = queryUserId;
+    }
+
     const client = new Client({
       connectionString: getPostgresURI()
     });
@@ -93,8 +110,8 @@ export async function GET(request: NextRequest) {
     await client.connect();
     
     const result = await client.query(
-      'SELECT wallet_address FROM users WHERE id = $1',
-      [(session.user as any).id]
+      'SELECT id, username, wallet_address FROM users WHERE id = $1',
+      [targetUserId]
     );
 
     if (result.rows.length === 0) {
@@ -108,6 +125,8 @@ export async function GET(request: NextRequest) {
     await client.end();
     
     return NextResponse.json({
+      user_id: result.rows[0].id,
+      username: result.rows[0].username,
       wallet_address: result.rows[0].wallet_address
     });
 
