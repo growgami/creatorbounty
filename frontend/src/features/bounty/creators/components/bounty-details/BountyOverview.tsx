@@ -127,6 +127,7 @@ const BountyOverview: React.FC<BountyOverviewProps> = ({
             bountyTitle={bountyData.title}
             bountyId={bountyId}
             creator={user.username}
+            creatorId={user.id}
             creatorPfp={user.userPfp}
           />
         )}

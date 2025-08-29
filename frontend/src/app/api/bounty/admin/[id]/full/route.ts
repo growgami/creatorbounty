@@ -77,8 +77,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Second query: Get submissions with user information using JOIN
     const submissionsQuery = `
       SELECT 
-        s.id, s.bounty_id, s.creator, s.creatorpfp, s.submitted_url, 
-        s.status, s.tx_hash, s.created_at, s.updated_at,
+        s.id, s.bounty_id, s.creator_id, s.creator, s.creatorpfp, s.submitted_url, 
+        s.status, s.tx_hash, s.payment_amount, s.created_at, s.updated_at,
         u.name as creator_name,
         u.userpfp as creator_profile_image,
         u.wallet_address as creator_wallet_address
@@ -94,11 +94,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const submissions: SubmissionWithUser[] = submissionsResult.rows.map(row => ({
       id: row.id,
       bountyId: row.bounty_id,
+      creator_id: row.creator_id,
       creator: row.creator,
       creatorPfp: row.creator_profile_image || row.creatorpfp || '',
       submitted_url: row.submitted_url,
       status: row.status,
       tx_hash: row.tx_hash || undefined,
+      payment_amount: row.payment_amount ? parseFloat(row.payment_amount) : undefined,
       createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
       updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
       creatorName: row.creator_name || undefined,

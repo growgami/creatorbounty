@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Client } from 'pg';
 import { getPostgresURI } from '@/models/Users';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
 /**
  * PUT /api/user/wallet
@@ -44,7 +44,7 @@ export async function PUT(request: NextRequest) {
     
     const result = await client.query(
       'UPDATE users SET wallet_address = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *',
-      [wallet_address, (session.user as any).id]
+      [wallet_address, (session.user as { id: string }).id]
     );
 
     if (result.rows.length === 0) {
@@ -91,10 +91,10 @@ export async function GET(request: NextRequest) {
     const queryUserId = searchParams.get('userId');
     
     // If userId is provided, verify the current user is admin
-    let targetUserId = (session.user as any).id;
+    let targetUserId = (session.user as { id: string }).id;
     if (queryUserId) {
       // Only admin users can query other users' wallet addresses
-      if ((session.user as any).role !== 'admin') {
+      if ((session.user as { role: string }).role !== 'admin') {
         return NextResponse.json(
           { error: 'Admin access required to query other users' },
           { status: 403 }

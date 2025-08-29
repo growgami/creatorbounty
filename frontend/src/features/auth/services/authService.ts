@@ -22,7 +22,7 @@ export const saveUserToDatabase = async (userData: User): Promise<User> => {
     // Handle null email by converting to undefined
     const userDataForDb = {
       ...userData,
-      email: userData.email === null ? undefined : userData.email
+
     };
     
     // Check if user already exists
@@ -55,11 +55,6 @@ export const saveUserToDatabase = async (userData: User): Promise<User> => {
           userDataForDb.userPfp,
           userDataForDb.wallet_address,
           userDataForDb.name,
-          userDataForDb.email,
-          userDataForDb.bio,
-          userDataForDb.followers_count,
-          userDataForDb.following_count,
-          userDataForDb.tweet_count,
           userDataForDb.role,
           userDataForDb.id
         ]
@@ -78,11 +73,6 @@ export const saveUserToDatabase = async (userData: User): Promise<User> => {
           userDataForDb.userPfp,
           userDataForDb.wallet_address,
           userDataForDb.name,
-          userDataForDb.email,
-          userDataForDb.bio,
-          userDataForDb.followers_count,
-          userDataForDb.following_count,
-          userDataForDb.tweet_count,
           userDataForDb.role
         ]
       );

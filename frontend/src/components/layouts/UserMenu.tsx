@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { LogOut, User, ChevronDown } from 'lucide-react';
 import { useRole } from '@/features/rbac-landing/hooks/useRole';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -18,7 +18,6 @@ const UserMenu: React.FC<UserMenuProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuth();
   const { role, clearRole } = useRole();
-  const router = useRouter();
   const pathname = usePathname();
   const { navigateToProfile } = useNavigation();
   const menuRef = useRef<HTMLDivElement>(null);

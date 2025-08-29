@@ -27,9 +27,8 @@ export async function GET(request: Request) {
     await client.connect();
 
     // Query to fetch submissions (with optional filters)
-    let query: string;
-    let queryParams: (string | number)[] = [];
-    let whereConditions: string[] = [];
+    const queryParams: (string | number)[] = [];
+    const whereConditions: string[] = [];
     
     if (bountyId) {
       whereConditions.push('s.bounty_id = $' + (queryParams.length + 1));
@@ -53,7 +52,7 @@ export async function GET(request: Request) {
     
     const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
     
-    query = `
+    const query = `
       SELECT 
         s.id, s.bounty_id, s.creator_id, s.creator, s.creatorpfp, s.submitted_url, 
         s.status, s.tx_hash, s.payment_amount, s.created_at, s.updated_at,

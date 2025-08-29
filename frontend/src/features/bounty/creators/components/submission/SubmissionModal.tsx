@@ -11,6 +11,7 @@ interface SubmissionModalProps {
   bountyTitle: string;
   bountyId: string;
   creator: string;
+  creatorId: string;
   creatorPfp: string;
 }
 
@@ -26,6 +27,7 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
   bountyTitle,
   bountyId,
   creator,
+  creatorId,
   creatorPfp
 }) => {
   const [formData, setFormData] = useState<SubmissionFormData>({
@@ -33,6 +35,7 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
     agreedToTerms: false,
     bountyId,
     creator,
+    creatorId,
     creatorPfp
   });
   const [validation, setValidation] = useState<ValidationResult>({
@@ -51,13 +54,14 @@ const SubmissionModal: React.FC<SubmissionModalProps> = ({
         agreedToTerms: false,
         bountyId,
         creator,
+        creatorId,
         creatorPfp
       });
       setValidation({ isValid: false, errors: [], warnings: [] });
       setIsSubmitting(false);
       setSubmitSuccess(false);
     }
-  }, [isOpen, bountyId, creator, creatorPfp]);
+  }, [isOpen, bountyId, creator, creatorId, creatorPfp]);
 
   // Validate TikTok URL
   const validateTikTokUrl = (url: string, agreedToTerms?: boolean): ValidationResult => {
