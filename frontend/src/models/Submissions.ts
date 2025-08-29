@@ -14,7 +14,10 @@ export interface Submission {
   /** Reference to the bounty this submission is for (references Bounty.id) */
   bountyId: string;
   
-  /** Creator's handle/username */
+  /** Creator's user ID (references User.id) */
+  creator_id: string;
+  
+  /** Creator's handle/username for display */
   creator: string;
   
   /** URL to creator's avatar */
@@ -26,8 +29,11 @@ export interface Submission {
   /** Current status of the submission */
   status: SubmissionStatus;
   
-  /** Wallet address for claimed submissions */
-  wallet_address?: string;
+  /** Transaction hash for completed payments */
+  tx_hash?: string;
+  
+  /** Amount paid for this submission in XPL */
+  payment_amount?: number;
   
   /** Creation timestamp */
   createdAt: string; // ISO 8601 format
@@ -42,11 +48,13 @@ export const SubmissionTableSchema = `
 CREATE TABLE IF NOT EXISTS submissions (
   id VARCHAR(36) PRIMARY KEY,  -- UUID
   bounty_id VARCHAR(36) NOT NULL REFERENCES bounties(id),
-  creator VARCHAR(100) NOT NULL,
+  creator_id VARCHAR(36) NOT NULL REFERENCES users(id),
+  creator VARCHAR(100) NOT NULL,  -- Username for display
   creatorPfp TEXT NOT NULL,
   submitted_url TEXT NOT NULL,
   status VARCHAR(20) NOT NULL,  -- pending, claimed, rejected
-  wallet_address VARCHAR(100),
+  tx_hash VARCHAR(100),
+  payment_amount DECIMAL(15,6),  -- Amount paid in XPL tokens
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -54,6 +62,7 @@ CREATE TABLE IF NOT EXISTS submissions (
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_submissions_bounty_id ON submissions(bounty_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
+CREATE INDEX IF NOT EXISTS idx_submissions_creator_id ON submissions(creator_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_creator ON submissions(creator);
 CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON submissions(created_at);
 CREATE INDEX IF NOT EXISTS idx_submissions_bounty_status ON submissions(bounty_id, status);

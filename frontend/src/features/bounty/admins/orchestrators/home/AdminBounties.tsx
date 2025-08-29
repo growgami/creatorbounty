@@ -19,6 +19,7 @@ import { useAdminBountyFull } from '@/features/bounty/admins/hooks/useAdminBount
 // SubmissionWithUser type that matches the API response
 interface SubmissionWithUser extends Submission {
   creatorName?: string;
+  creator_wallet_address?: string;
 }
 import { useTotalSubmissionCount } from '@/features/bounty/admins/utils/totalSubmissionCount';
 
@@ -53,7 +54,7 @@ const mapSubmissionToAdminSubmission = (submission: SubmissionWithUser): AdminSu
   avatar: submission.creatorPfp || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face',
   submitted: formatRelativeTime(submission.createdAt),
   status: submission.status,
-  txHash: submission.wallet_address,
+  txHash: submission.tx_hash,
   url: submission.submitted_url
 });
 
@@ -161,10 +162,10 @@ const AdminBounties: React.FC<AdminBountiesProps> = ({
   };
 
   // Function to handle successful payment and update submission with transaction hash
-  const handlePaymentSuccess = async (txHash: string) => {
+  const handlePaymentSuccess = async (txHash: string, paymentAmount?: number) => {
     if (selectedSubmission) {
       try {
-        // Update submission status to 'claimed' and add wallet address (txHash)
+        // Update submission status to 'claimed' and add transaction hash
         const response = await fetch('/api/submissions', {
           method: 'PATCH',
           headers: {
@@ -173,7 +174,8 @@ const AdminBounties: React.FC<AdminBountiesProps> = ({
           body: JSON.stringify({
             id: selectedSubmission.id,
             status: 'claimed',
-            wallet_address: txHash
+            tx_hash: txHash,
+            payment_amount: paymentAmount
           })
         });
 
@@ -213,7 +215,7 @@ const AdminBounties: React.FC<AdminBountiesProps> = ({
             body: JSON.stringify({
               id: submissionId,
               status: 'claimed',
-              wallet_address: null
+              tx_hash: null
             })
           });
 
@@ -290,10 +292,10 @@ const AdminBounties: React.FC<AdminBountiesProps> = ({
     }
   };
 
-  const handleConfirmSubmissionWrapper = async (txHash?: string) => {
+  const handleConfirmSubmissionWrapper = async (txHash?: string, paymentAmount?: number) => {
     if (selectedSubmission) {
       if (txHash) {
-        await handlePaymentSuccess(txHash);
+        await handlePaymentSuccess(txHash, paymentAmount);
       } else {
         // If no txHash, just update status to claimed without wallet address
         try {
@@ -305,7 +307,7 @@ const AdminBounties: React.FC<AdminBountiesProps> = ({
             body: JSON.stringify({
               id: selectedSubmission.id,
               status: 'claimed',
-              wallet_address: selectedSubmission.txHash || null
+              tx_hash: selectedSubmission.txHash || null
             })
           });
 
@@ -459,6 +461,8 @@ const AdminBounties: React.FC<AdminBountiesProps> = ({
           setSelectedSubmission(null);
         }}
         submission={selectedSubmission}
+        creatorWalletAddress={selectedSubmission ? apiSubmissions?.find(s => s.id === selectedSubmission.id)?.creator_wallet_address : undefined}
+        paymentAmount={singleBounty ? (singleBounty.bountyPool / singleBounty.totalSubmissions) : 0.000001}
         onConfirm={handleConfirmSubmissionWrapper}
         onReject={handleRejectSubmissionWrapper}
       />

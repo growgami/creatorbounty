@@ -34,6 +34,7 @@ export interface SubmissionFormData {
   tiktokUrl: string;
   agreedToTerms: boolean;
   bountyId: string;
+  creatorId: string;
   creator: string;
   creatorPfp: string;
 }

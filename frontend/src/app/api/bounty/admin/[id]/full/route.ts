@@ -78,9 +78,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const submissionsQuery = `
       SELECT 
         s.id, s.bounty_id, s.creator, s.creatorpfp, s.submitted_url, 
-        s.status, s.wallet_address, s.created_at, s.updated_at,
+        s.status, s.tx_hash, s.created_at, s.updated_at,
         u.name as creator_name,
-        u.userpfp as creator_profile_image
+        u.userpfp as creator_profile_image,
+        u.wallet_address as creator_wallet_address
       FROM submissions s
       LEFT JOIN users u ON s.creator = u.username
       WHERE s.bounty_id = $1
@@ -97,10 +98,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       creatorPfp: row.creator_profile_image || row.creatorpfp || '',
       submitted_url: row.submitted_url,
       status: row.status,
-      wallet_address: row.wallet_address || undefined,
+      tx_hash: row.tx_hash || undefined,
       createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
       updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
       creatorName: row.creator_name || undefined,
+      creator_wallet_address: row.creator_wallet_address || undefined,
     }));
 
     // Calculate submission summary

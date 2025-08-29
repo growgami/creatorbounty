@@ -38,15 +38,15 @@ export const ensureTableColumns = async () => {
   try {
     await client.connect();
     
-    // Check if users table exists
-    const tableExistsResult = await client.query(
+    // ===== Users Table Migrations =====
+    const usersTableExists = await client.query(
       `SELECT EXISTS (
         SELECT FROM information_schema.tables 
         WHERE table_name = 'users'
       );`
     );
     
-    if (tableExistsResult.rows[0].exists) {
+    if (usersTableExists.rows[0].exists) {
       console.log('Users table exists, checking columns...');
       
       // Check if role column exists
@@ -72,6 +72,75 @@ export const ensureTableColumns = async () => {
         console.log('Role column added successfully');
       } else {
         console.log('Role column already exists');
+      }
+
+      // Remove deprecated columns from users table
+      const deprecatedUserColumns = ['email', 'bio', 'followers_count', 'following_count', 'tweet_count'];
+      for (const column of deprecatedUserColumns) {
+        const columnExists = await client.query(
+          `SELECT EXISTS (
+            SELECT FROM information_schema.columns 
+            WHERE table_name = 'users' AND column_name = $1
+          );`, [column]
+        );
+        
+        if (columnExists.rows[0].exists) {
+          console.log(`Removing deprecated column '${column}' from users table...`);
+          await client.query(`ALTER TABLE users DROP COLUMN IF EXISTS ${column};`);
+          console.log(`Column '${column}' removed successfully`);
+        }
+      }
+    }
+
+    // ===== Submissions Table Migrations =====
+    const submissionsTableExists = await client.query(
+      `SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'submissions'
+      );`
+    );
+    
+    if (submissionsTableExists.rows[0].exists) {
+      console.log('Submissions table exists, checking columns...');
+      
+      // Check if old wallet_address column exists (needs to be renamed to tx_hash)
+      const walletAddressExists = await client.query(
+        `SELECT EXISTS (
+          SELECT FROM information_schema.columns 
+          WHERE table_name = 'submissions' AND column_name = 'wallet_address'
+        );`
+      );
+      
+      // Check if new tx_hash column exists
+      const txHashExists = await client.query(
+        `SELECT EXISTS (
+          SELECT FROM information_schema.columns 
+          WHERE table_name = 'submissions' AND column_name = 'tx_hash'
+        );`
+      );
+      
+      if (walletAddressExists.rows[0].exists && !txHashExists.rows[0].exists) {
+        console.log('Renaming wallet_address column to tx_hash in submissions table...');
+        await client.query(`
+          ALTER TABLE submissions 
+          RENAME COLUMN wallet_address TO tx_hash;
+        `);
+        console.log('Column renamed successfully: wallet_address -> tx_hash');
+      } else if (walletAddressExists.rows[0].exists && txHashExists.rows[0].exists) {
+        // Both columns exist, drop the old one
+        console.log('Both wallet_address and tx_hash exist, dropping wallet_address...');
+        await client.query(`ALTER TABLE submissions DROP COLUMN wallet_address;`);
+        console.log('Old wallet_address column dropped successfully');
+      } else if (!txHashExists.rows[0].exists) {
+        // Neither column exists, add tx_hash
+        console.log('Adding tx_hash column to submissions table...');
+        await client.query(`
+          ALTER TABLE submissions 
+          ADD COLUMN tx_hash VARCHAR(100);
+        `);
+        console.log('tx_hash column added successfully');
+      } else {
+        console.log('Submissions table columns are up to date');
       }
     }
     

@@ -25,21 +25,6 @@ export interface User {
   /** User's display name */
   name?: string;
   
-  /** User's email (if available) */
-  email?: string;
-  
-  /** Twitter user's bio/description */
-  bio?: string;
-  
-  /** Twitter user's follower count */
-  followers_count?: number;
-  
-  /** Twitter user's following count */
-  following_count?: number;
-  
-  /** Twitter user's tweet count */
-  tweet_count?: number;
-  
   /** User's role in the system */
   role: 'admin' | 'creator';
   
@@ -59,11 +44,6 @@ CREATE TABLE IF NOT EXISTS users (
   userPfp TEXT,
   wallet_address VARCHAR(100),
   name VARCHAR(100),
-  email VARCHAR(255),
-  bio TEXT,
-  followers_count INTEGER,
-  following_count INTEGER,
-  tweet_count INTEGER,
   role VARCHAR(20) NOT NULL DEFAULT 'creator',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -71,7 +51,6 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
 
